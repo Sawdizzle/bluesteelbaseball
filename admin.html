@@ -58,15 +58,12 @@
       <!-- Login -->
       <div class="panel admin-card plate" id="login-card">
         <span class="eyebrow">Team admin</span>
-        <h2 style="margin-top: 0.9rem;">Sign in</h2>
-        <p class="note" style="margin-top: 0.4rem;">Enter your admin email and we'll send a 6-digit code — no password to remember.</p>
-        <div class="field"><label for="login-email">Email</label><input id="login-email" type="email" autocomplete="email" inputmode="email" /></div>
-        <div class="field" id="code-field" hidden><label for="login-code">6-digit code</label><input id="login-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" /></div>
-        <div class="hero-actions" style="margin-top: 1.15rem;">
-          <button class="button button-primary" id="send-code-btn">Send code</button>
-          <button class="button button-primary" id="verify-btn" hidden>Sign in</button>
-          <button class="button button-secondary" id="restart-btn" hidden>Use a different email</button>
-        </div>
+        <h2 style="margin-top: 0.9rem;" id="login-title">Sign in</h2>
+        <p class="note" id="login-hint" style="margin-top: 0.4rem;"></p>
+        <div class="field"><label for="login-user">Username</label><input id="login-user" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" /></div>
+        <div class="field"><label for="login-pin">PIN</label><input id="login-pin" type="password" autocomplete="current-password" /></div>
+        <div class="field" id="pin2-field" hidden><label for="login-pin2">Confirm PIN</label><input id="login-pin2" type="password" autocomplete="new-password" /></div>
+        <div class="hero-actions" style="margin-top: 1.15rem;"><button class="button button-primary" id="login-btn">Sign in</button></div>
         <p class="msg" id="login-msg"></p>
       </div>
 
@@ -112,57 +109,69 @@
     const $ = (id) => document.getElementById(id);
     const say = (id, text, ok = true) => { const el = $(id); el.textContent = text; el.className = `msg ${ok ? 'ok' : 'err'}`; };
 
-    // ---------- auth ----------
-    async function refreshAuth() {
-      const { data: { session } } = await sb.auth.getSession();
-      const authed = !!session;
-      $('login-card').hidden = authed;
-      $('dash').hidden = !authed;
-      $('logout-btn').hidden = !authed;
-      if (authed) loadDash();
+    // ---------- PIN auth (verified server-side in bluesteel.* functions) ----------
+    const CREDS_KEY = 'bs_admin_creds';
+    let creds = null;                    // { username, pin } — kept only for this tab
+    let needsSetup = false;
+    try { creds = JSON.parse(sessionStorage.getItem(CREDS_KEY) || 'null'); } catch { creds = null; }
+
+    async function rpc(fn, args) {
+      const { data, error } = await sb.rpc(fn, args);
+      if (error) throw new Error(error.message || 'Something went wrong.');
+      return data;
     }
 
-    // Passwordless email one-time-code sign-in. Step 1: send the code.
-    $('send-code-btn').addEventListener('click', async () => {
-      const email = $('login-email').value.trim();
-      if (!email) return say('login-msg', 'Enter your email first.', false);
-      say('login-msg', 'Sending code…');
-      const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
-      if (error) return say('login-msg', error.message, false);
-      $('code-field').hidden = false;
-      $('send-code-btn').hidden = true;
-      $('verify-btn').hidden = false;
-      $('restart-btn').hidden = false;
-      $('login-email').setAttribute('readonly', '');
-      say('login-msg', `Code sent to ${email}. Check your inbox (and spam) — it expires shortly.`);
-      $('login-code').focus();
+    function showDash() {
+      $('login-card').hidden = true;
+      $('dash').hidden = false;
+      $('logout-btn').hidden = false;
+      loadDash();
+    }
+
+    async function init() {
+      try { needsSetup = !(await rpc('admin_is_setup')); } catch { needsSetup = false; }
+      if (needsSetup) {
+        $('login-title').textContent = 'Create admin login';
+        $('login-hint').textContent = 'First time here — choose a username and PIN for the team. Anyone with these can post announcements and photos, so keep them private.';
+        $('pin2-field').hidden = false;
+        $('login-btn').textContent = 'Create login';
+      } else {
+        $('login-title').textContent = 'Sign in';
+        $('login-hint').textContent = 'Enter the team admin username and PIN.';
+        $('pin2-field').hidden = true;
+        $('login-btn').textContent = 'Sign in';
+      }
+      if (!needsSetup && creds) {
+        try { if (await rpc('admin_login', { p_username: creds.username, p_pin: creds.pin })) return showDash(); } catch { /* fall through */ }
+        creds = null; sessionStorage.removeItem(CREDS_KEY);
+      }
+      $('login-card').hidden = false;
+    }
+
+    $('login-btn').addEventListener('click', async () => {
+      const username = $('login-user').value.trim();
+      const pin = $('login-pin').value;
+      if (!username || !pin) return say('login-msg', 'Enter a username and PIN.', false);
+      try {
+        if (needsSetup) {
+          if (pin.length < 4) return say('login-msg', 'PIN must be at least 4 characters.', false);
+          if (pin !== $('login-pin2').value) return say('login-msg', 'PINs do not match.', false);
+          say('login-msg', 'Creating…');
+          await rpc('admin_set_credentials', { p_username: username, p_pin: pin });
+          needsSetup = false;
+        } else {
+          say('login-msg', 'Signing in…');
+          if (!(await rpc('admin_login', { p_username: username, p_pin: pin }))) return say('login-msg', 'Wrong username or PIN.', false);
+        }
+        creds = { username, pin };
+        sessionStorage.setItem(CREDS_KEY, JSON.stringify(creds));
+        say('login-msg', '');
+        showDash();
+      } catch (e) { say('login-msg', e.message, false); }
     });
 
-    // Step 2: verify the code.
-    $('verify-btn').addEventListener('click', async () => {
-      const email = $('login-email').value.trim();
-      const token = $('login-code').value.trim();
-      if (!token) return say('login-msg', 'Enter the 6-digit code.', false);
-      say('login-msg', 'Verifying…');
-      const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' });
-      if (error) return say('login-msg', error.message, false);
-      refreshAuth();
-    });
-
-    // Start over with a different email.
-    $('restart-btn').addEventListener('click', () => {
-      $('code-field').hidden = true;
-      $('send-code-btn').hidden = false;
-      $('verify-btn').hidden = true;
-      $('restart-btn').hidden = true;
-      $('login-email').removeAttribute('readonly');
-      $('login-code').value = '';
-      say('login-msg', '');
-    });
-
-    $('login-email').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !$('send-code-btn').hidden) $('send-code-btn').click(); });
-    $('login-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('verify-btn').click(); });
-    $('logout-btn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
+    ['login-user', 'login-pin', 'login-pin2'].forEach(id => $(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') $('login-btn').click(); }));
+    $('logout-btn').addEventListener('click', () => { creds = null; sessionStorage.removeItem(CREDS_KEY); location.reload(); });
 
     // ---------- dashboard ----------
     async function loadDash() {
@@ -177,24 +186,25 @@
 
     // ---------- announcements ----------
     async function loadAnnouncement() {
-      const { data } = await sb.from('announcements').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1);
+      const { data } = await sb.from('announcements').select('message').eq('is_active', true).order('created_at', { ascending: false }).limit(1);
       $('a-status').textContent = data?.[0] ? `Active now: "${data[0].message}"` : 'No active announcement.';
       $('a-status').className = 'msg';
     }
     $('a-post').addEventListener('click', async () => {
       const message = $('a-msg').value.trim();
       if (!message) return say('a-status', 'Write a message first.', false);
-      const off = await sb.from('announcements').update({ is_active: false }).eq('is_active', true);
-      if (off.error) return say('a-status', off.error.message, false);
-      const { error } = await sb.from('announcements').insert({ message, is_active: true });
-      if (error) return say('a-status', error.message, false);
-      $('a-msg').value = '';
-      loadAnnouncement();
+      try {
+        await rpc('admin_set_announcement', { p_username: creds.username, p_pin: creds.pin, p_message: message });
+        $('a-msg').value = '';
+        say('a-status', 'Posted ✓');
+        loadAnnouncement();
+      } catch (e) { say('a-status', e.message, false); }
     });
     $('a-clear').addEventListener('click', async () => {
-      const { error } = await sb.from('announcements').update({ is_active: false }).eq('is_active', true);
-      if (error) return say('a-status', error.message, false);
-      loadAnnouncement();
+      try {
+        await rpc('admin_clear_announcement', { p_username: creds.username, p_pin: creds.pin });
+        loadAnnouncement();
+      } catch (e) { say('a-status', e.message, false); }
     });
 
     // ---------- media ----------
@@ -208,27 +218,30 @@
       $('media-list').querySelectorAll('.admin-item').forEach(item => {
         item.querySelector('.del').addEventListener('click', async () => {
           if (!confirm('Remove this from the site?')) return;
-          const { error } = await sb.from('media').delete().eq('id', item.dataset.id);
-          if (!error) item.remove();
+          try {
+            await rpc('admin_delete_media', { p_username: creds.username, p_pin: creds.pin, p_id: item.dataset.id });
+            item.remove();
+          } catch (e) { alert(e.message); }
         });
       });
     }
     $('m-add').addEventListener('click', async () => {
       const url = $('m-url').value.trim();
       if (!url) return say('m-msg', 'A URL is required.', false);
-      const { error } = await sb.from('media').insert({
-        kind: $('m-kind').value,
-        url,
-        caption: $('m-cap').value.trim() || null,
-        team_id: $('m-team').value || null,
-      });
-      if (error) return say('m-msg', error.message, false);
-      say('m-msg', 'Added ✓');
-      $('m-url').value = ''; $('m-cap').value = '';
-      loadMedia();
+      try {
+        await rpc('admin_add_media', {
+          p_username: creds.username, p_pin: creds.pin,
+          p_kind: $('m-kind').value, p_url: url,
+          p_caption: $('m-cap').value.trim() || null,
+          p_team_id: $('m-team').value || null,
+        });
+        say('m-msg', 'Added ✓');
+        $('m-url').value = ''; $('m-cap').value = '';
+        loadMedia();
+      } catch (e) { say('m-msg', e.message, false); }
     });
 
-    refreshAuth();
+    init();
   </script>
 </body>
 </html>
