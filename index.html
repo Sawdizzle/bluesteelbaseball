@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blue Steel Baseball — Sanger, TX</title>
+  <meta name="description" content="Blue Steel Baseball is a competitive, development-focused select program in Sanger, Texas fielding 10U and 14U teams. Schedules, scores, live streams, and highlights." />
+  <meta property="og:title" content="Blue Steel Baseball" />
+  <meta property="og:description" content="Select baseball in Sanger, TX — schedules, scores, live streams, and highlights for our 10U and 14U teams." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/assets/og.jpg" />
+  <link rel="icon" href="/assets/favicon.ico" />
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=supreme@400,500,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="announcement" class="announcement" role="status" hidden></div>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="/" aria-label="Blue Steel Baseball home">
+        <span class="brand-mark"><img src="/assets/logo.webp" alt="" width="80" height="80" /></span>
+        <span class="brand-text"><strong>Blue Steel</strong><span>Baseball · Sanger TX</span></span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <button class="menu-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <div class="nav-links" id="nav-links">
+          <a href="/">Home</a>
+          <a href="/schedule">Schedule</a>
+          <a href="/watch">Watch</a>
+          <a href="/gallery">Gallery</a>
+          <a href="/contact">Contact</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero: the chalk diamond -->
+    <section class="hero">
+      <svg class="hero-diamond" viewBox="0 0 600 600" aria-hidden="true">
+        <!-- outfield diamond -->
+        <path class="draw" style="--len: 1480;" d="M300 36 L564 300 L300 564 L36 300 Z" />
+        <!-- infield -->
+        <path class="draw accent" style="--len: 750;" d="M300 168 L432 300 L300 432 L168 300 Z" />
+        <!-- mound + rubber -->
+        <circle cx="300" cy="300" r="30" />
+        <!-- bases -->
+        <rect x="292" y="160" width="16" height="16" transform="rotate(45 300 168)" />
+        <rect x="424" y="292" width="16" height="16" transform="rotate(45 432 300)" />
+        <rect x="292" y="424" width="16" height="16" transform="rotate(45 300 432)" />
+        <rect x="160" y="292" width="16" height="16" transform="rotate(45 168 300)" />
+      </svg>
+      <div class="container">
+        <div class="hero-copy">
+          <span class="eyebrow">Select Baseball · Sanger, Texas</span>
+          <h1>Built like<br /><span class="steel-word">steel.</span></h1>
+          <p class="hero-tagline">Play with purpose.</p>
+          <p>A competitive, development-focused program fielding 10U and 14U teams. Every game streamed. Every score posted. Every family in the loop.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="/schedule">See the schedule</a>
+            <a class="button button-secondary" href="/watch">Watch us play</a>
+          </div>
+          <div class="hero-meta">
+            <span>10U &amp; 14U</span>
+            <span>Season one</span>
+            <span>North Texas</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- The board -->
+    <section class="board" aria-label="Scoreboard">
+      <div class="container">
+        <div class="board-rail">
+          <div class="board-cell" id="next-game">
+            <div class="board-label">On deck</div>
+            <div class="board-main">— — : — —</div>
+            <div class="board-sub">Loading the board…</div>
+          </div>
+          <div class="board-cell" id="last-game">
+            <div class="board-label">Last final</div>
+            <div class="board-main">— · —</div>
+            <div class="board-sub">Loading the board…</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Teams -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Our teams</span>
+          <h2>Two rosters, one standard</h2>
+          <p>Coachable players, strong work ethic, and families committed to long-term growth.</p>
+        </div>
+        <div class="teams-grid" id="teams-grid">
+          <article class="team-card plate"><div class="age">10<small>U</small></div><p>Loading…</p></article>
+          <article class="team-card plate"><div class="age">14<small>U</small></div><p>Loading…</p></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- The program -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">The program</span>
+          <h2>What we're about</h2>
+        </div>
+        <div class="pillars">
+          <div class="pillar">
+            <h3>Player development</h3>
+            <p>Structured practices with a long-view plan for every athlete — fundamentals first, reps that matter, and honest feedback.</p>
+          </div>
+          <div class="pillar">
+            <h3>Every game streamed</h3>
+            <p>Grandparents in another state, parents stuck at work — nobody misses a pitch. Live on YouTube, replays up after the final out.</p>
+          </div>
+          <div class="pillar">
+            <h3>Families in the loop</h3>
+            <p>Schedules, scores, and news live right here and on our socials. No group-text archaeology required.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Follow -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Follow along</span>
+          <h2>Every game, everywhere</h2>
+          <p>Live streams on YouTube, highlights on TikTok and Instagram, team news on Facebook. If we're playing, you can watch.</p>
+        </div>
+        <div class="social-row" id="social-row"></div>
+      </div>
+    </section>
+
+    <!-- Tryouts CTA -->
+    <section class="section">
+      <div class="container">
+        <div class="cta-banner plate">
+          <div>
+            <h2>Want in?</h2>
+            <p>Tryout dates get announced on our socials and posted at the top of this site. Roster interest is welcome any time.</p>
+          </div>
+          <a class="button" href="/contact">Talk to the coaches</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <div class="brand">
+        <span class="brand-mark"><img src="/assets/logo.webp" alt="" width="80" height="80" /></span>
+        <span class="brand-text"><strong>Blue Steel</strong><span>Baseball · Sanger TX</span></span>
+      </div>
+      <p>Built like steel · Play with purpose</p>
+      <a class="admin-link" href="/admin">Team admin</a>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { mountNav, mountAnnouncement, getNextGame, getLastResult, getLiveGame, getTeams, fmtFull, fmtDate, resultOf, esc } from '/js/data.js';
+    import { SOCIALS } from '/js/config.js';
+
+    mountNav();
+    mountAnnouncement();
+
+    document.getElementById('social-row').innerHTML = SOCIALS
+      .map(s => `<a class="button button-secondary" href="${s.url}" target="_blank" rel="noopener noreferrer">${s.name}</a>`)
+      .join('');
+
+    const nextEl = document.getElementById('next-game');
+    const lastEl = document.getElementById('last-game');
+
+    function countdownHTML(target) {
+      const diff = Math.max(0, target - Date.now());
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor(diff / 3600000) % 24;
+      const m = Math.floor(diff / 60000) % 60;
+      const s = Math.floor(diff / 1000) % 60;
+      const p = n => String(n).padStart(2, '0');
+      return `<span class="countdown">
+        <span>${p(d)}<small>days</small></span>
+        <span>${p(h)}<small>hrs</small></span>
+        <span>${p(m)}<small>min</small></span>
+        <span>${p(s)}<small>sec</small></span>
+      </span>`;
+    }
+
+    async function board() {
+      try {
+        const live = await getLiveGame();
+        if (live) {
+          nextEl.querySelector('.board-label').innerHTML = `<span class="dot">●</span> Live now`;
+          nextEl.querySelector('.board-main').textContent = `${live.teams.name} vs ${live.opponent}`;
+          nextEl.querySelector('.board-sub').innerHTML = live.stream_url
+            ? `<a href="/watch"><strong>Watch the stream →</strong></a>`
+            : `${esc(live.location ?? '')}`;
+        } else {
+          const g = await getNextGame();
+          if (g) {
+            const target = new Date(g.game_date).getTime();
+            const main = nextEl.querySelector('.board-main');
+            main.innerHTML = countdownHTML(target);
+            setInterval(() => { main.innerHTML = countdownHTML(target); }, 1000);
+            nextEl.querySelector('.board-sub').innerHTML =
+              `<strong>${esc(g.teams.name)} ${g.is_home ? 'vs' : '@'} ${esc(g.opponent)}</strong> · ${fmtFull(g.game_date)}${g.location ? ' · ' + esc(g.location) : ''}`;
+          } else {
+            nextEl.querySelector('.board-main').textContent = 'TBA';
+            nextEl.querySelector('.board-sub').textContent = 'Next matchup will be posted here — follow our socials for news.';
+          }
+        }
+      } catch {
+        nextEl.querySelector('.board-sub').textContent = 'Board is warming up — check back in a minute.';
+      }
+
+      try {
+        const g = await getLastResult();
+        if (g) {
+          const r = resultOf(g);
+          lastEl.querySelector('.board-main').innerHTML =
+            `<span class="${r === 'W' ? 'win' : r === 'L' ? 'loss' : ''}">${r ?? ''}</span> ${g.our_score}–${g.their_score}`;
+          lastEl.querySelector('.board-sub').innerHTML =
+            `<strong>${esc(g.teams.name)} ${g.is_home ? 'vs' : '@'} ${esc(g.opponent)}</strong> · ${fmtDate(g.game_date)}`;
+        } else {
+          lastEl.querySelector('.board-main').textContent = '— · —';
+          lastEl.querySelector('.board-sub').textContent = 'First final of the season will land here.';
+        }
+      } catch {
+        lastEl.querySelector('.board-sub').textContent = 'Board is warming up — check back in a minute.';
+      }
+    }
+    board();
+
+    (async () => {
+      try {
+        const teams = await getTeams();
+        document.getElementById('teams-grid').innerHTML = teams.map(t => {
+          const m = String(t.name).match(/^(\d+)\s*(U)?/i);
+          const num = m ? m[1] : t.name;
+          return `
+          <article class="team-card plate">
+            <div class="age">${esc(num)}<small>U</small></div>
+            <p>${esc(t.description ?? '')}</p>
+            ${t.coach ? `<p class="note">Coach: ${esc(t.coach)}</p>` : ''}
+          </article>`;
+        }).join('');
+      } catch { /* keep static placeholders */ }
+    })();
+  </script>
+</body>
+</html>

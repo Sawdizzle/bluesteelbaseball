@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tryouts &amp; Contact — Blue Steel Baseball</title>
+  <meta name="description" content="Interested in joining Blue Steel Baseball? Tryout information and contact details for our 10U and 14U select teams in Sanger, Texas." />
+  <link rel="icon" href="/assets/favicon.ico" />
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=supreme@400,500,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="announcement" class="announcement" role="status" hidden></div>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="/" aria-label="Blue Steel Baseball home">
+        <span class="brand-mark"><img src="/assets/logo.webp" alt="" width="80" height="80" /></span>
+        <span class="brand-text"><strong>Blue Steel</strong><span>Baseball · Sanger TX</span></span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <button class="menu-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <div class="nav-links" id="nav-links">
+          <a href="/">Home</a>
+          <a href="/schedule">Schedule</a>
+          <a href="/watch">Watch</a>
+          <a href="/gallery">Gallery</a>
+          <a href="/contact">Contact</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section">
+      <div class="container contact-grid">
+        <div class="panel contact-card plate">
+          <span class="eyebrow">Join Blue Steel</span>
+          <h2 style="margin-top: 1rem;">Tryouts &amp; roster spots</h2>
+          <p style="color: var(--muted); margin-top: 1rem; max-width: 55ch;">We field 10U and 14U teams out of Sanger, Texas. Tryout dates are announced on our social channels and posted at the top of this site — if there's nothing announced right now, roster interest is still welcome any time.</p>
+          <p style="color: var(--muted); margin-top: 0.9rem; max-width: 55ch;">What we look for: coachable players, strong work ethic, positive attitudes, and committed families. What we offer: structured practices, a player-development focus, and competitive tournament play.</p>
+          <div class="hero-actions" style="margin-top: 1.5rem;">
+            <a class="button button-clay" id="email-btn" href="#">Email the coaches</a>
+          </div>
+        </div>
+        <div class="panel contact-card plate">
+          <span class="eyebrow">Find us</span>
+          <h3 style="margin-top: 1rem;">Sanger, Texas</h3>
+          <p style="color: var(--muted); margin-top: 0.7rem;">Home fields and practices in the Sanger area. Game locations are listed on the <a href="/schedule" style="color: var(--steel);">schedule</a>.</p>
+          <h3 style="margin-top: 1.7rem;">Follow the team</h3>
+          <div class="social-row" id="social-row"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <div class="brand">
+        <span class="brand-mark"><img src="/assets/logo.webp" alt="" width="80" height="80" /></span>
+        <span class="brand-text"><strong>Blue Steel</strong><span>Baseball · Sanger TX</span></span>
+      </div>
+      <p>Built like steel · Play with purpose</p>
+      <a class="admin-link" href="/admin">Team admin</a>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { mountNav, mountAnnouncement } from '/js/data.js';
+    import { SOCIALS, CONTACT_EMAIL } from '/js/config.js';
+
+    mountNav();
+    mountAnnouncement();
+    document.getElementById('email-btn').href = `mailto:${CONTACT_EMAIL}`;
+    document.getElementById('email-btn').textContent = CONTACT_EMAIL;
+    document.getElementById('social-row').innerHTML = SOCIALS
+      .map(s => `<a class="button button-secondary" href="${s.url}" target="_blank" rel="noopener noreferrer">${s.name}</a>`)
+      .join('');
+  </script>
+</body>
+</html>

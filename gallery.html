@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery — Blue Steel Baseball</title>
+  <meta name="description" content="Photos and highlights from Blue Steel Baseball games and events." />
+  <link rel="icon" href="/assets/favicon.ico" />
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=supreme@400,500,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="announcement" class="announcement" role="status" hidden></div>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="/" aria-label="Blue Steel Baseball home">
+        <span class="brand-mark"><img src="/assets/logo.webp" alt="" width="80" height="80" /></span>
+        <span class="brand-text"><strong>Blue Steel</strong><span>Baseball · Sanger TX</span></span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <button class="menu-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <div class="nav-links" id="nav-links">
+          <a href="/">Home</a>
+          <a href="/schedule">Schedule</a>
+          <a href="/watch">Watch</a>
+          <a href="/gallery">Gallery</a>
+          <a href="/contact">Contact</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">From the field</span>
+          <h2>Gallery</h2>
+          <p>Game-day photos and moments worth keeping.</p>
+        </div>
+        <div id="photo-area">
+          <p class="empty">Loading photos…</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <div class="brand">
+        <span class="brand-mark"><img src="/assets/logo.webp" alt="" width="80" height="80" /></span>
+        <span class="brand-text"><strong>Blue Steel</strong><span>Baseball · Sanger TX</span></span>
+      </div>
+      <p>Built like steel · Play with purpose</p>
+      <a class="admin-link" href="/admin">Team admin</a>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { mountNav, mountAnnouncement, getMedia, esc, unavailable } from '/js/data.js';
+
+    mountNav();
+    mountAnnouncement();
+
+    const area = document.getElementById('photo-area');
+
+    function emptyState() {
+      const frames = ['First pitch', 'First hit', 'First out', 'First win', 'Team photo', 'Dogpile'];
+      area.innerHTML = `
+        <div class="empty-frames">
+          ${frames.map(f => `<div class="empty-frame plate-sm"><span>${f}</span></div>`).join('')}
+        </div>
+        <p class="empty-note">Season one hasn't started yet — these frames fill up after the first game. Until then, our <a href="/watch" style="color: var(--steel);">YouTube channel</a> and socials are the place to watch.</p>
+      `;
+    }
+
+    (async () => {
+      try {
+        const photos = await getMedia('photo');
+        if (!photos.length) return emptyState();
+        area.innerHTML = `<div class="photo-grid">` + photos.map(p => `
+          <figure class="photo-card plate-sm">
+            <img src="${p.url}" alt="${esc(p.caption ?? 'Blue Steel Baseball photo')}" loading="lazy" />
+            ${p.caption ? `<figcaption>${esc(p.caption)}</figcaption>` : ''}
+          </figure>`).join('') + `</div>`;
+      } catch {
+        unavailable(area, 'The gallery');
+      }
+    })();
+  </script>
+</body>
+</html>
