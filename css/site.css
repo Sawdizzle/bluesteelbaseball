@@ -48,14 +48,16 @@ html {
   -webkit-font-smoothing: antialiased;
   -webkit-text-size-adjust: 100%;
   background: var(--field-deep);
-  overflow-x: hidden;
   overscroll-behavior-y: none;
 }
 body {
   min-height: 100vh;
   min-height: 100svh;
   overscroll-behavior-y: none;
-  overflow-x: hidden;
+  /* clip (not hidden) contains the hero diamond without making <body> a scroll
+     container — hidden here broke vertical scroll on macOS and left phantom
+     blank space on iOS. The hero clips its own decoration, so this is a net. */
+  overflow-x: clip;
   -webkit-tap-highlight-color: transparent;
   font-family: var(--font-body);
   font-size: var(--text-base);
