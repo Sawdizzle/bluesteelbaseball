@@ -49,10 +49,12 @@ html {
   -webkit-text-size-adjust: 100%;
   background: var(--field-deep);
   overflow-x: hidden;
+  overscroll-behavior-y: none;
 }
 body {
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100svh;
+  overscroll-behavior-y: none;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
   font-family: var(--font-body);
@@ -254,7 +256,7 @@ h3 { font-size: var(--text-lg); letter-spacing: 0.04em; }
 .footer-row a.admin-link:hover { color: var(--muted); }
 
 /* ---------- 404 ---------- */
-.foul { min-height: 60dvh; display: grid; place-content: center; text-align: center; gap: 1.1rem; padding: 4rem 0; }
+.foul { min-height: 60vh; min-height: 60svh; display: grid; place-content: center; text-align: center; gap: 1.1rem; padding: 4rem 0; }
 .foul h1 { color: var(--steel); }
 .foul p { color: var(--muted); }
 
