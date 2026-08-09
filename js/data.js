@@ -182,6 +182,23 @@ export const esc = (s) =>
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   })[c]);
 
+// ---------- realtime ----------
+
+// Fire `handler` whenever any game row changes (score, status, add, delete),
+// so live scoreboards update without a page reload. Returns an unsubscribe fn.
+// Fails quietly if realtime is unavailable — callers already load once up front.
+export function onGamesChange(handler) {
+  try {
+    const channel = sb
+      .channel('bluesteel-games')
+      .on('postgres_changes', { event: '*', schema: 'bluesteel', table: 'games' }, handler)
+      .subscribe();
+    return () => { try { sb.removeChannel(channel); } catch { /* noop */ } };
+  } catch {
+    return () => {};
+  }
+}
+
 // ---------- shared UI ----------
 
 export async function mountAnnouncement() {

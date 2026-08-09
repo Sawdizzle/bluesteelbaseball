@@ -58,6 +58,7 @@
           <p>Every game gets streamed. Catch it live, or run it back below.</p>
           <div class="hero-actions" style="margin-top: 0.3rem;">
             <a class="button button-secondary" id="yt-link" href="#" target="_blank" rel="noopener noreferrer">Subscribe on YouTube</a>
+            <a class="button button-clay" id="gc-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Follow live on GameChanger</a>
           </div>
         </div>
         <div class="video-frame plate" id="main-frame"></div>
@@ -89,11 +90,16 @@
 
   <script type="module">
     import { mountNav, mountAnnouncement, getLiveGame, getStreamedGames, getMedia, youTubeId, fmtDate, resultOf, esc } from '/js/data.js';
-    import { YT_CHANNEL_URL, YT_UPLOADS_PLAYLIST } from '/js/config.js';
+    import { YT_CHANNEL_URL, YT_UPLOADS_PLAYLIST, GC_TEAM_URL } from '/js/config.js';
 
     mountNav();
     mountAnnouncement();
     document.getElementById('yt-link').href = YT_CHANNEL_URL;
+    if (GC_TEAM_URL) {
+      const gc = document.getElementById('gc-link');
+      gc.href = GC_TEAM_URL;
+      gc.hidden = false;
+    }
 
     const frame = document.getElementById('main-frame');
     const note = document.getElementById('main-frame-note');

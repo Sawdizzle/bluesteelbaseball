@@ -203,8 +203,8 @@
   </footer>
 
   <script type="module">
-    import { mountNav, mountAnnouncement, getNextGame, getLastResult, getLiveGame, getTeams, getResults, recordFrom, recordLabel, fmtFull, fmtDate, resultOf, esc } from '/js/data.js';
-    import { SOCIALS } from '/js/config.js';
+    import { mountNav, mountAnnouncement, getNextGame, getLastResult, getLiveGame, getTeams, getResults, recordFrom, recordLabel, onGamesChange, fmtFull, fmtDate, resultOf, esc } from '/js/data.js';
+    import { SOCIALS, GC_TEAM_URL } from '/js/config.js';
 
     mountNav();
     mountAnnouncement();
@@ -231,22 +231,31 @@
       </span>`;
     }
 
+    // A single live countdown timer we can cancel before each re-render,
+    // so realtime updates never stack overlapping intervals.
+    let countdownTimer = null;
+
     async function board() {
+      if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
       try {
         const live = await getLiveGame();
         if (live) {
+          const r = resultOf(live);
+          const score = (live.our_score != null && live.their_score != null)
+            ? ` &nbsp;<span class="${r === 'W' ? 'win' : r === 'L' ? 'loss' : ''}">${live.our_score}–${live.their_score}</span>` : '';
+          const gcLink = GC_TEAM_URL
+            ? ` · <a href="${GC_TEAM_URL}" target="_blank" rel="noopener noreferrer"><strong>Live on GameChanger →</strong></a>` : '';
           nextEl.querySelector('.board-label').innerHTML = `<span class="dot">●</span> Live now`;
-          nextEl.querySelector('.board-main').textContent = `${live.teams.name} vs ${live.opponent}`;
-          nextEl.querySelector('.board-sub').innerHTML = live.stream_url
-            ? `<a href="/watch"><strong>Watch the stream →</strong></a>`
-            : `${esc(live.location ?? '')}`;
+          nextEl.querySelector('.board-main').innerHTML = `${esc(live.teams.name)} ${live.is_home ? 'vs' : '@'} ${esc(live.opponent)}${score}`;
+          nextEl.querySelector('.board-sub').innerHTML =
+            (live.stream_url ? `<a href="/watch"><strong>Watch the stream →</strong></a>` : `${esc(live.location ?? '')}`) + gcLink;
         } else {
           const g = await getNextGame();
           if (g) {
             const target = new Date(g.game_date).getTime();
             const main = nextEl.querySelector('.board-main');
             main.innerHTML = countdownHTML(target);
-            setInterval(() => { main.innerHTML = countdownHTML(target); }, 1000);
+            countdownTimer = setInterval(() => { main.innerHTML = countdownHTML(target); }, 1000);
             nextEl.querySelector('.board-sub').innerHTML =
               `<strong>${esc(g.teams.name)} ${g.is_home ? 'vs' : '@'} ${esc(g.opponent)}</strong> · ${fmtFull(g.game_date)}${g.location ? ' · ' + esc(g.location) : ''}`;
           } else {
@@ -258,6 +267,7 @@
         nextEl.querySelector('.board-sub').textContent = 'Board is warming up — check back in a minute.';
       }
 
+      lastEl.querySelector('.board-label').textContent = 'Last final';
       try {
         const g = await getLastResult();
         if (g) {
@@ -279,6 +289,8 @@
       }
     }
     board();
+    // Live: re-render the board the instant a score or status changes in admin.
+    onGamesChange(() => board());
 
     (async () => {
       try {

@@ -78,7 +78,7 @@
   </footer>
 
   <script type="module">
-    import { mountNav, mountAnnouncement, getTeams, getAllGames, fmtDate, fmtTime, resultOf, recordFrom, recordLabel, icsHref, mapsHref, esc, unavailable } from '/js/data.js';
+    import { mountNav, mountAnnouncement, getTeams, getAllGames, onGamesChange, fmtDate, fmtTime, resultOf, recordFrom, recordLabel, icsHref, mapsHref, esc, unavailable } from '/js/data.js';
 
     mountNav();
     mountAnnouncement();
@@ -160,6 +160,15 @@
         unavailable(body, 'The schedule');
       }
     })();
+
+    // Live: when a score or status changes in admin, re-pull and re-render.
+    // The selected team tab (`current`) is preserved across refreshes.
+    onGamesChange(async () => {
+      try {
+        games = await getAllGames();
+        render();
+      } catch { /* keep whatever is on screen */ }
+    });
   </script>
 </body>
 </html>
