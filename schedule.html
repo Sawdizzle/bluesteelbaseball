@@ -55,13 +55,9 @@
         <div class="section-head">
           <span class="eyebrow">Season</span>
           <h2>Schedule &amp; results</h2>
-          <p>All times Central. Scores go up right after the final out.</p>
+          <p>Live from GameChanger — game times, results, and scores update automatically as we play.</p>
         </div>
-        <div class="team-tabs" role="tablist" aria-label="Team" id="team-tabs"></div>
-
-        <div id="schedule-body">
-          <p class="empty">Loading the schedule…</p>
-        </div>
+        <div id="gc-schedule" class="gc-embed plate"></div>
       </div>
     </section>
   </main>
@@ -78,97 +74,13 @@
   </footer>
 
   <script type="module">
-    import { mountNav, mountAnnouncement, getTeams, getAllGames, onGamesChange, fmtDate, fmtTime, resultOf, recordFrom, recordLabel, icsHref, mapsHref, esc, unavailable } from '/js/data.js';
-
+    import { mountNav, mountAnnouncement } from '/js/data.js';
     mountNav();
     mountAnnouncement();
-
-    const tabs = document.getElementById('team-tabs');
-    const body = document.getElementById('schedule-body');
-    let games = [];
-    let teams = [];
-    let current = 'all';
-
-    function rowHTML(g, upcoming) {
-      let score;
-      if (g.status === 'final' && g.our_score != null) {
-        const r = resultOf(g);
-        score = `<span class="tag ${r}">${r}</span>${g.our_score}–${g.their_score}`;
-      } else if (g.status === 'live') {
-        score = `<span class="live">● LIVE</span>`;
-      } else if (g.status === 'cancelled') {
-        score = `<span class="upcoming">Cancelled</span>`;
-      } else {
-        score = `<span class="upcoming">${fmtTime(g.game_date)}</span>`;
-      }
-      const details = [g.tournament, g.location].filter(Boolean).map(esc).join(' · ');
-      // Add-to-calendar + directions, only for games still ahead of us.
-      let actions = '';
-      if (upcoming && g.status !== 'cancelled') {
-        const ics = icsHref(g);
-        const map = mapsHref(g.location);
-        const parts = [];
-        if (ics) parts.push(`<a class="game-action" href="${ics}" download="blue-steel-${esc(g.teams.slug)}-game.ics">＋ Calendar</a>`);
-        if (map) parts.push(`<a class="game-action" href="${map}" target="_blank" rel="noopener noreferrer">◆ Directions</a>`);
-        if (parts.length) actions = `<div class="game-actions">${parts.join('')}</div>`;
-      }
-      return `<div class="game-row">
-        <div class="game-when">${fmtDate(g.game_date)}<br>${esc(g.teams.name)}</div>
-        <div class="game-what">
-          <strong>${g.is_home ? 'vs' : '@'} ${esc(g.opponent)}</strong>
-          ${details ? `<span>${details}</span>` : ''}
-          ${actions}
-        </div>
-        <div class="game-score">${score}</div>
-      </div>`;
-    }
-
-    function render() {
-      const filtered = current === 'all' ? games : games.filter(g => g.teams.slug === current);
-      if (!filtered.length) {
-        body.innerHTML = `<p class="empty">No games on the calendar yet for this team — new dates get posted here first.</p>`;
-        return;
-      }
-      const now = Date.now();
-      const upcoming = filtered.filter(g => new Date(g.game_date).getTime() >= now && g.status !== 'final');
-      const past = filtered.filter(g => !(new Date(g.game_date).getTime() >= now && g.status !== 'final')).reverse();
-      const rec = recordLabel(recordFrom(filtered, current === 'all' ? null : current));
-      body.innerHTML = `
-        ${upcoming.length ? `<h3 style="margin: 0 0 0.9rem;">Upcoming</h3><div class="game-list">${upcoming.map(g => rowHTML(g, true)).join('')}</div>` : ''}
-        ${past.length ? `<h3 style="margin: 2.2rem 0 0.9rem;">Results${rec ? ` <span class="record-chip">${rec}</span>` : ''}</h3><div class="game-list">${past.map(g => rowHTML(g, false)).join('')}</div>` : ''}
-      `;
-    }
-
-    function renderTabs() {
-      const all = [{ slug: 'all', name: 'All' }, ...teams];
-      tabs.innerHTML = all.map(t =>
-        `<button role="tab" aria-selected="${t.slug === current}" data-slug="${t.slug}">${esc(t.name)}</button>`
-      ).join('');
-      tabs.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
-        current = b.dataset.slug;
-        renderTabs();
-        render();
-      }));
-    }
-
-    (async () => {
-      try {
-        [teams, games] = await Promise.all([getTeams(), getAllGames()]);
-        renderTabs();
-        render();
-      } catch {
-        unavailable(body, 'The schedule');
-      }
-    })();
-
-    // Live: when a score or status changes in admin, re-pull and re-render.
-    // The selected team tab (`current`) is preserved across refreshes.
-    onGamesChange(async () => {
-      try {
-        games = await getAllGames();
-        render();
-      } catch { /* keep whatever is on screen */ }
-    });
   </script>
+
+  <!-- GameChanger live schedule widget -->
+  <script src="https://widgets.gc.com/static/js/sdk.v1.js"
+          onload="GC.team.schedule.init({ target: '#gc-schedule', widgetId: '27f4e868-6c00-4dc2-8b36-641c3b631e7f', maxVerticalGamesVisible: 8 })"></script>
 </body>
 </html>

@@ -109,21 +109,15 @@
       </div>
     </section>
 
-    <!-- The board -->
-    <section class="board" aria-label="Scoreboard">
+    <!-- Live schedule from GameChanger -->
+    <section class="section" aria-label="Upcoming games">
       <div class="container">
-        <div class="board-rail">
-          <div class="board-cell" id="next-game">
-            <div class="board-label">On deck</div>
-            <div class="board-main">— — : — —</div>
-            <div class="board-sub">Loading the board…</div>
-          </div>
-          <div class="board-cell" id="last-game">
-            <div class="board-label">Last final</div>
-            <div class="board-main">— · —</div>
-            <div class="board-sub">Loading the board…</div>
-          </div>
+        <div class="section-head">
+          <span class="eyebrow">On the schedule</span>
+          <h2>Next up</h2>
+          <p>Straight from GameChanger — scores update live as we play. <a href="/schedule" style="color: var(--steel);">Full schedule &amp; results →</a></p>
         </div>
+        <div id="gc-home" class="gc-embed plate"></div>
       </div>
     </section>
 
@@ -204,8 +198,8 @@
   </footer>
 
   <script type="module">
-    import { mountNav, mountAnnouncement, getNextGame, getLastResult, getLiveGame, getTeams, getResults, recordFrom, recordLabel, onGamesChange, fmtFull, fmtDate, resultOf, esc } from '/js/data.js';
-    import { SOCIALS, GC_TEAM_URL } from '/js/config.js';
+    import { mountNav, mountAnnouncement, getTeams, esc } from '/js/data.js';
+    import { SOCIALS } from '/js/config.js';
 
     mountNav();
     mountAnnouncement();
@@ -213,85 +207,6 @@
     document.getElementById('social-row').innerHTML = SOCIALS
       .map(s => `<a class="button button-secondary" href="${s.url}" target="_blank" rel="noopener noreferrer">${s.name}</a>`)
       .join('');
-
-    const nextEl = document.getElementById('next-game');
-    const lastEl = document.getElementById('last-game');
-
-    function countdownHTML(target) {
-      const diff = Math.max(0, target - Date.now());
-      const d = Math.floor(diff / 86400000);
-      const h = Math.floor(diff / 3600000) % 24;
-      const m = Math.floor(diff / 60000) % 60;
-      const s = Math.floor(diff / 1000) % 60;
-      const p = n => String(n).padStart(2, '0');
-      return `<span class="countdown">
-        <span>${p(d)}<small>days</small></span>
-        <span>${p(h)}<small>hrs</small></span>
-        <span>${p(m)}<small>min</small></span>
-        <span>${p(s)}<small>sec</small></span>
-      </span>`;
-    }
-
-    // A single live countdown timer we can cancel before each re-render,
-    // so realtime updates never stack overlapping intervals.
-    let countdownTimer = null;
-
-    async function board() {
-      if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
-      try {
-        const live = await getLiveGame();
-        if (live) {
-          const r = resultOf(live);
-          const score = (live.our_score != null && live.their_score != null)
-            ? ` &nbsp;<span class="${r === 'W' ? 'win' : r === 'L' ? 'loss' : ''}">${live.our_score}–${live.their_score}</span>` : '';
-          const gcLink = GC_TEAM_URL
-            ? ` · <a href="${GC_TEAM_URL}" target="_blank" rel="noopener noreferrer"><strong>Live on GameChanger →</strong></a>` : '';
-          nextEl.querySelector('.board-label').innerHTML = `<span class="dot">●</span> Live now`;
-          nextEl.querySelector('.board-main').innerHTML = `${esc(live.teams.name)} ${live.is_home ? 'vs' : '@'} ${esc(live.opponent)}${score}`;
-          nextEl.querySelector('.board-sub').innerHTML =
-            (live.stream_url ? `<a href="/watch"><strong>Watch the stream →</strong></a>` : `${esc(live.location ?? '')}`) + gcLink;
-        } else {
-          const g = await getNextGame();
-          if (g) {
-            const target = new Date(g.game_date).getTime();
-            const main = nextEl.querySelector('.board-main');
-            main.innerHTML = countdownHTML(target);
-            countdownTimer = setInterval(() => { main.innerHTML = countdownHTML(target); }, 1000);
-            nextEl.querySelector('.board-sub').innerHTML =
-              `<strong>${esc(g.teams.name)} ${g.is_home ? 'vs' : '@'} ${esc(g.opponent)}</strong> · ${fmtFull(g.game_date)}${g.location ? ' · ' + esc(g.location) : ''}`;
-          } else {
-            nextEl.querySelector('.board-main').textContent = 'TBA';
-            nextEl.querySelector('.board-sub').textContent = 'Next matchup will be posted here — follow our socials for news.';
-          }
-        }
-      } catch {
-        nextEl.querySelector('.board-sub').textContent = 'Board is warming up — check back in a minute.';
-      }
-
-      lastEl.querySelector('.board-label').textContent = 'Last final';
-      try {
-        const g = await getLastResult();
-        if (g) {
-          const r = resultOf(g);
-          lastEl.querySelector('.board-main').innerHTML =
-            `<span class="${r === 'W' ? 'win' : r === 'L' ? 'loss' : ''}">${r ?? ''}</span> ${g.our_score}–${g.their_score}`;
-          lastEl.querySelector('.board-sub').innerHTML =
-            `<strong>${esc(g.teams.name)} ${g.is_home ? 'vs' : '@'} ${esc(g.opponent)}</strong> · ${fmtDate(g.game_date)}`;
-          try {
-            const rec = recordLabel(recordFrom(await getResults()));
-            if (rec) lastEl.querySelector('.board-label').textContent = `Last final · ${rec} season`;
-          } catch { /* record is a bonus — never break the board for it */ }
-        } else {
-          lastEl.querySelector('.board-main').textContent = '— · —';
-          lastEl.querySelector('.board-sub').textContent = 'First final of the season will land here.';
-        }
-      } catch {
-        lastEl.querySelector('.board-sub').textContent = 'Board is warming up — check back in a minute.';
-      }
-    }
-    board();
-    // Live: re-render the board the instant a score or status changes in admin.
-    onGamesChange(() => board());
 
     (async () => {
       try {
@@ -309,5 +224,9 @@
       } catch { /* keep static placeholders */ }
     })();
   </script>
+
+  <!-- GameChanger live schedule widget (compact) -->
+  <script src="https://widgets.gc.com/static/js/sdk.v1.js"
+          onload="GC.team.schedule.init({ target: '#gc-home', widgetId: '27f4e868-6c00-4dc2-8b36-641c3b631e7f', maxVerticalGamesVisible: 3 })"></script>
 </body>
 </html>

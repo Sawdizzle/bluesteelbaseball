@@ -59,9 +59,14 @@
       <div class="panel admin-card plate" id="login-card">
         <span class="eyebrow">Team admin</span>
         <h2 style="margin-top: 0.9rem;">Sign in</h2>
-        <div class="field"><label for="login-email">Email</label><input id="login-email" type="email" autocomplete="email" /></div>
-        <div class="field"><label for="login-pass">Password</label><input id="login-pass" type="password" autocomplete="current-password" /></div>
-        <div class="hero-actions" style="margin-top: 1.15rem;"><button class="button button-primary" id="login-btn">Sign in</button></div>
+        <p class="note" style="margin-top: 0.4rem;">Enter your admin email and we'll send a 6-digit code — no password to remember.</p>
+        <div class="field"><label for="login-email">Email</label><input id="login-email" type="email" autocomplete="email" inputmode="email" /></div>
+        <div class="field" id="code-field" hidden><label for="login-code">6-digit code</label><input id="login-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" /></div>
+        <div class="hero-actions" style="margin-top: 1.15rem;">
+          <button class="button button-primary" id="send-code-btn">Send code</button>
+          <button class="button button-primary" id="verify-btn" hidden>Sign in</button>
+          <button class="button button-secondary" id="restart-btn" hidden>Use a different email</button>
+        </div>
         <p class="msg" id="login-msg"></p>
       </div>
 
@@ -69,26 +74,8 @@
       <div id="dash" hidden>
 
         <div class="panel admin-card plate">
-          <h3>Post a score</h3>
-          <p class="note" style="margin-top: 0.4rem;">Most recent games first. Set the score, flip the status, save.</p>
-          <div class="admin-list" id="score-list"></div>
-        </div>
-
-        <div class="panel admin-card plate">
-          <h3>Add a game</h3>
-          <div class="field-row">
-            <div class="field"><label for="g-team">Team</label><select id="g-team"></select></div>
-            <div class="field"><label for="g-date">Date &amp; time (Central)</label><input id="g-date" type="datetime-local" /></div>
-          </div>
-          <div class="field"><label for="g-opp">Opponent</label><input id="g-opp" placeholder="e.g. Denton Destroyers" /></div>
-          <div class="field-row">
-            <div class="field"><label for="g-loc">Location</label><input id="g-loc" placeholder="e.g. Porter Park, Sanger" /></div>
-            <div class="field"><label for="g-tourn">Tournament (optional)</label><input id="g-tourn" /></div>
-          </div>
-          <div class="field"><label for="g-stream">Stream URL (optional, YouTube)</label><input id="g-stream" placeholder="https://youtube.com/live/..." /></div>
-          <label class="checkbox"><input type="checkbox" id="g-home" checked /> Home game (vs) — uncheck for away (@)</label>
-          <div class="hero-actions" style="margin-top: 1.15rem;"><button class="button button-primary" id="g-add">Add game</button></div>
-          <p class="msg" id="g-msg"></p>
+          <h3>Schedule &amp; scores</h3>
+          <p class="note" style="margin-top: 0.4rem;">Games, times, and scores are handled in <strong>GameChanger</strong> and appear on the site automatically — nothing to enter here. Keep score in the GameChanger app and the Home and <a href="/schedule" style="color: var(--steel);">Schedule</a> pages update on their own.</p>
         </div>
 
         <div class="panel admin-card plate">
@@ -120,7 +107,7 @@
   </main>
 
   <script type="module">
-    import { sb, getTeams, fmtDate, esc } from '/js/data.js';
+    import { sb, getTeams, esc } from '/js/data.js';
 
     const $ = (id) => document.getElementById(id);
     const say = (id, text, ok = true) => { const el = $(id); el.textContent = text; el.className = `msg ${ok ? 'ok' : 'err'}`; };
@@ -135,92 +122,58 @@
       if (authed) loadDash();
     }
 
-    $('login-btn').addEventListener('click', async () => {
-      say('login-msg', 'Signing in…');
-      const { error } = await sb.auth.signInWithPassword({
-        email: $('login-email').value.trim(),
-        password: $('login-pass').value,
-      });
+    // Passwordless email one-time-code sign-in. Step 1: send the code.
+    $('send-code-btn').addEventListener('click', async () => {
+      const email = $('login-email').value.trim();
+      if (!email) return say('login-msg', 'Enter your email first.', false);
+      say('login-msg', 'Sending code…');
+      const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+      if (error) return say('login-msg', error.message, false);
+      $('code-field').hidden = false;
+      $('send-code-btn').hidden = true;
+      $('verify-btn').hidden = false;
+      $('restart-btn').hidden = false;
+      $('login-email').setAttribute('readonly', '');
+      say('login-msg', `Code sent to ${email}. Check your inbox (and spam) — it expires shortly.`);
+      $('login-code').focus();
+    });
+
+    // Step 2: verify the code.
+    $('verify-btn').addEventListener('click', async () => {
+      const email = $('login-email').value.trim();
+      const token = $('login-code').value.trim();
+      if (!token) return say('login-msg', 'Enter the 6-digit code.', false);
+      say('login-msg', 'Verifying…');
+      const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' });
       if (error) return say('login-msg', error.message, false);
       refreshAuth();
     });
-    $('login-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('login-btn').click(); });
+
+    // Start over with a different email.
+    $('restart-btn').addEventListener('click', () => {
+      $('code-field').hidden = true;
+      $('send-code-btn').hidden = false;
+      $('verify-btn').hidden = true;
+      $('restart-btn').hidden = true;
+      $('login-email').removeAttribute('readonly');
+      $('login-code').value = '';
+      say('login-msg', '');
+    });
+
+    $('login-email').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !$('send-code-btn').hidden) $('send-code-btn').click(); });
+    $('login-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('verify-btn').click(); });
     $('logout-btn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
 
     // ---------- dashboard ----------
-    let teams = [];
-
     async function loadDash() {
       try {
-        teams = await getTeams();
-      } catch (e) {
-        return say('g-msg', `Could not load teams: ${e.message}`, false);
-      }
-      const opts = teams.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
-      $('g-team').innerHTML = opts;
-      $('m-team').innerHTML = `<option value="">—</option>` + opts;
-      loadScores();
+        const teams = await getTeams();
+        const opts = teams.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
+        $('m-team').innerHTML = `<option value="">—</option>` + opts;
+      } catch { /* the media team dropdown is optional */ }
       loadAnnouncement();
       loadMedia();
     }
-
-    async function loadScores() {
-      const { data, error } = await sb.from('games')
-        .select('*, teams(name)')
-        .order('game_date', { ascending: false })
-        .limit(12);
-      if (error) return;
-      $('score-list').innerHTML = (data ?? []).map(g => `
-        <div class="admin-item" data-id="${g.id}">
-          <div class="meta"><strong>${esc(g.teams.name)} ${g.is_home ? 'vs' : '@'} ${esc(g.opponent)}</strong><br>${fmtDate(g.game_date)}</div>
-          <div class="score-inline">
-            <input type="number" min="0" class="us" value="${g.our_score ?? ''}" placeholder="Us" aria-label="Our score" />
-            <span>–</span>
-            <input type="number" min="0" class="them" value="${g.their_score ?? ''}" placeholder="Them" aria-label="Their score" />
-            <select class="status" aria-label="Status">
-              ${['scheduled','live','final','cancelled'].map(s => `<option ${s === g.status ? 'selected' : ''}>${s}</option>`).join('')}
-            </select>
-            <button class="button button-secondary mini save">Save</button>
-            <button class="button button-secondary mini danger del">✕</button>
-          </div>
-        </div>`).join('');
-
-      $('score-list').querySelectorAll('.admin-item').forEach(item => {
-        item.querySelector('.save').addEventListener('click', async () => {
-          const us = item.querySelector('.us').value;
-          const them = item.querySelector('.them').value;
-          const { error } = await sb.from('games').update({
-            our_score: us === '' ? null : Number(us),
-            their_score: them === '' ? null : Number(them),
-            status: item.querySelector('.status').value,
-          }).eq('id', item.dataset.id);
-          item.querySelector('.save').textContent = error ? 'Error' : 'Saved ✓';
-          setTimeout(() => { item.querySelector('.save').textContent = 'Save'; }, 1800);
-        });
-        item.querySelector('.del').addEventListener('click', async () => {
-          if (!confirm('Delete this game? This can\'t be undone.')) return;
-          const { error } = await sb.from('games').delete().eq('id', item.dataset.id);
-          if (!error) item.remove();
-        });
-      });
-    }
-
-    $('g-add').addEventListener('click', async () => {
-      if (!$('g-opp').value.trim() || !$('g-date').value) return say('g-msg', 'Opponent and date are required.', false);
-      const { error } = await sb.from('games').insert({
-        team_id: $('g-team').value,
-        opponent: $('g-opp').value.trim(),
-        game_date: new Date($('g-date').value).toISOString(),
-        location: $('g-loc').value.trim() || null,
-        tournament: $('g-tourn').value.trim() || null,
-        stream_url: $('g-stream').value.trim() || null,
-        is_home: $('g-home').checked,
-      });
-      if (error) return say('g-msg', error.message, false);
-      say('g-msg', 'Game added ✓');
-      ['g-opp','g-loc','g-tourn','g-stream','g-date'].forEach(id => $(id).value = '');
-      loadScores();
-    });
 
     // ---------- announcements ----------
     async function loadAnnouncement() {

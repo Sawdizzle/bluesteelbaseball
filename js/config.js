@@ -10,7 +10,7 @@ export const YT_UPLOADS_PLAYLIST = 'UUFb6_Nt_4asM-syOSy81AZg';
 // scores (and video). To get it: open web.gc.com, sign in, go to your team, and
 // copy the team URL from the address bar. Paste it below. Leave '' to hide the
 // "Follow live on GameChanger" button everywhere.
-export const GC_TEAM_URL = '';
+export const GC_TEAM_URL = 'https://web.gc.com/teams/VIemcjQNJ8sO';
 
 export const SOCIALS = [
   { name: 'Facebook', url: 'https://www.facebook.com/BlueSteelBaseball/' },
