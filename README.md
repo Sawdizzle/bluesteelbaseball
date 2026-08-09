@@ -4,7 +4,7 @@ Team website for Blue Steel Baseball, a select program in Sanger, TX fielding 10
 
 Static multi-page site — no build step, no framework, no dependencies to install. Push to `main` and Vercel deploys it as-is.
 
-## Structure 
+## Structure
 
 ```
 index.html        Home — hero, live scoreboard, teams, program, tryouts CTA

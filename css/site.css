@@ -43,9 +43,18 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  background: var(--field-deep);
+  overflow-x: hidden;
+}
 body {
+  min-height: 100vh;
   min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: 1.65;
@@ -58,7 +67,10 @@ img, svg, iframe { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
 :focus-visible { outline: 2px solid var(--steel); outline-offset: 3px; }
-.container { width: min(calc(100% - 2.2rem), var(--content)); margin-inline: auto; }
+.container {
+  width: min(calc(100% - 2.2rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)), var(--content));
+  margin-inline: auto;
+}
 .skip-link { position: absolute; left: 1rem; top: -3.2rem; z-index: 100; background: var(--steel); color: var(--ink-on-steel); padding: 0.7rem 1.1rem; font-weight: 700; }
 .skip-link:focus { top: 1rem; }
 
@@ -78,9 +90,11 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 .site-header {
   position: sticky; top: 0; z-index: 50;
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   background: rgba(6, 9, 16, 0.82);
   border-bottom: 1px solid var(--chalk-line);
+  padding-top: env(safe-area-inset-top, 0px);
 }
 .site-header__inner { min-height: 4.4rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .brand { display: flex; align-items: center; gap: 0.75rem; }
@@ -233,7 +247,7 @@ h3 { font-size: var(--text-lg); letter-spacing: 0.04em; }
 .social-row { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.2rem; }
 
 /* ---------- footer ---------- */
-.site-footer { margin-top: 2.5rem; padding: 2.2rem 0 2.8rem; border-top: 2px solid var(--chalk-line); }
+.site-footer { margin-top: 2.5rem; padding: 2.2rem 0 calc(2.8rem + env(safe-area-inset-bottom, 0px)); border-top: 2px solid var(--chalk-line); }
 .footer-row { display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; flex-wrap: wrap; }
 .footer-row p { color: var(--faint); font-family: var(--font-board); font-size: var(--text-xs); letter-spacing: 0.2em; text-transform: uppercase; }
 .footer-row a.admin-link { color: var(--faint); font-size: var(--text-xs); letter-spacing: 0.14em; text-transform: uppercase; }
