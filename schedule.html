@@ -6,7 +6,18 @@
   <meta name="theme-color" content="#060910" />
   <title>Schedule &amp; Results — Blue Steel Baseball</title>
   <meta name="description" content="Game schedule, scores, and results for Blue Steel Baseball's 10U and 14U teams." />
+  <link rel="canonical" href="https://bluesteelbaseball.com/schedule" />
+  <meta property="og:title" content="Schedule & Results — Blue Steel Baseball" />
+  <meta property="og:description" content="Game schedule, scores, and results for Blue Steel Baseball's 10U and 14U teams." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://bluesteelbaseball.com/schedule" />
+  <meta property="og:site_name" content="Blue Steel Baseball" />
+  <meta property="og:image" content="https://bluesteelbaseball.com/assets/og.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://bluesteelbaseball.com/assets/og.jpg" />
   <link rel="icon" href="/assets/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="preconnect" href="https://api.fontshare.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=supreme@400,500,700&display=swap" rel="stylesheet" />
@@ -67,7 +78,7 @@
   </footer>
 
   <script type="module">
-    import { mountNav, mountAnnouncement, getTeams, getAllGames, fmtDate, fmtTime, resultOf, esc, unavailable } from '/js/data.js';
+    import { mountNav, mountAnnouncement, getTeams, getAllGames, fmtDate, fmtTime, resultOf, recordFrom, recordLabel, icsHref, mapsHref, esc, unavailable } from '/js/data.js';
 
     mountNav();
     mountAnnouncement();
@@ -78,7 +89,7 @@
     let teams = [];
     let current = 'all';
 
-    function rowHTML(g) {
+    function rowHTML(g, upcoming) {
       let score;
       if (g.status === 'final' && g.our_score != null) {
         const r = resultOf(g);
@@ -90,11 +101,23 @@
       } else {
         score = `<span class="upcoming">${fmtTime(g.game_date)}</span>`;
       }
+      const details = [g.tournament, g.location].filter(Boolean).map(esc).join(' · ');
+      // Add-to-calendar + directions, only for games still ahead of us.
+      let actions = '';
+      if (upcoming && g.status !== 'cancelled') {
+        const ics = icsHref(g);
+        const map = mapsHref(g.location);
+        const parts = [];
+        if (ics) parts.push(`<a class="game-action" href="${ics}" download="blue-steel-${esc(g.teams.slug)}-game.ics">＋ Calendar</a>`);
+        if (map) parts.push(`<a class="game-action" href="${map}" target="_blank" rel="noopener noreferrer">◆ Directions</a>`);
+        if (parts.length) actions = `<div class="game-actions">${parts.join('')}</div>`;
+      }
       return `<div class="game-row">
         <div class="game-when">${fmtDate(g.game_date)}<br>${esc(g.teams.name)}</div>
         <div class="game-what">
           <strong>${g.is_home ? 'vs' : '@'} ${esc(g.opponent)}</strong>
-          <span>${[g.tournament, g.location].filter(Boolean).map(esc).join(' · ')}</span>
+          ${details ? `<span>${details}</span>` : ''}
+          ${actions}
         </div>
         <div class="game-score">${score}</div>
       </div>`;
@@ -109,9 +132,10 @@
       const now = Date.now();
       const upcoming = filtered.filter(g => new Date(g.game_date).getTime() >= now && g.status !== 'final');
       const past = filtered.filter(g => !(new Date(g.game_date).getTime() >= now && g.status !== 'final')).reverse();
+      const rec = recordLabel(recordFrom(filtered, current === 'all' ? null : current));
       body.innerHTML = `
-        ${upcoming.length ? `<h3 style="margin: 0 0 0.9rem;">Upcoming</h3><div class="game-list">${upcoming.map(rowHTML).join('')}</div>` : ''}
-        ${past.length ? `<h3 style="margin: 2.2rem 0 0.9rem;">Results</h3><div class="game-list">${past.map(rowHTML).join('')}</div>` : ''}
+        ${upcoming.length ? `<h3 style="margin: 0 0 0.9rem;">Upcoming</h3><div class="game-list">${upcoming.map(g => rowHTML(g, true)).join('')}</div>` : ''}
+        ${past.length ? `<h3 style="margin: 2.2rem 0 0.9rem;">Results${rec ? ` <span class="record-chip">${rec}</span>` : ''}</h3><div class="game-list">${past.map(g => rowHTML(g, false)).join('')}</div>` : ''}
       `;
     }
 

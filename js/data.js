@@ -88,6 +88,16 @@ export async function getStreamedGames() {
   return data;
 }
 
+// Final games only — the raw material for a season record.
+export async function getResults() {
+  const { data, error } = await sb
+    .from('games')
+    .select('our_score, their_score, teams(slug, name)')
+    .eq('status', 'final');
+  if (error) throw error;
+  return data ?? [];
+}
+
 // ---------- formatting ----------
 
 const dateFmt = new Intl.DateTimeFormat('en-US', {
@@ -110,6 +120,54 @@ export function resultOf(g) {
   if (g.our_score > g.their_score) return 'W';
   if (g.our_score < g.their_score) return 'L';
   return 'T';
+}
+
+// Tally W-L-T from final games, optionally filtered to one team slug.
+export function recordFrom(results, slug = null) {
+  const rec = { w: 0, l: 0, t: 0 };
+  for (const g of results) {
+    if (slug && g.teams?.slug !== slug) continue;
+    const r = resultOf(g);
+    if (r === 'W') rec.w++;
+    else if (r === 'L') rec.l++;
+    else if (r === 'T') rec.t++;
+  }
+  return rec;
+}
+
+// "8-3" or "8-3-1" (ties only shown when they exist). null when no games yet.
+export function recordLabel(rec) {
+  if (!rec || (rec.w + rec.l + rec.t) === 0) return null;
+  return rec.t ? `${rec.w}-${rec.l}-${rec.t}` : `${rec.w}-${rec.l}`;
+}
+
+// Google Maps "directions/search" link for a game location.
+export function mapsHref(location) {
+  if (!location) return null;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+}
+
+// A downloadable .ics file (Apple/Google/Outlook all accept it) for one game.
+export function icsHref(game) {
+  const start = new Date(game.game_date);
+  if (isNaN(start)) return null;
+  const end = new Date(start.getTime() + 2 * 60 * 60 * 1000); // ~2h ballgame
+  const z = (d) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const clean = (s) => String(s ?? '').replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n');
+  const vs = game.is_home ? 'vs' : '@';
+  const title = `${game.teams?.name ?? 'Blue Steel'} ${vs} ${game.opponent}`;
+  const desc = [game.tournament, 'Blue Steel Baseball'].filter(Boolean).join(' · ');
+  const lines = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Blue Steel Baseball//EN',
+    'BEGIN:VEVENT',
+    `UID:${z(start)}-${clean(game.opponent)}@bluesteelbaseball.com`,
+    `DTSTART:${z(start)}`, `DTEND:${z(end)}`,
+    `SUMMARY:${clean(title)}`,
+    game.location ? `LOCATION:${clean(game.location)}` : '',
+    `DESCRIPTION:${clean(desc)}`,
+    'END:VEVENT', 'END:VCALENDAR',
+  ].filter(Boolean);
+  return `data:text/calendar;charset=utf-8,${encodeURIComponent(lines.join('\r\n'))}`;
 }
 
 export function youTubeId(url) {

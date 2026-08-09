@@ -218,6 +218,17 @@ h3 { font-size: var(--text-lg); letter-spacing: 0.04em; }
 .game-when { font-family: var(--font-board); font-size: var(--text-xs); letter-spacing: 0.1em; color: var(--steel); line-height: 1.6; text-transform: uppercase; }
 .game-what strong { display: block; font-weight: 600; letter-spacing: 0.01em; }
 .game-what span { display: block; color: var(--faint); font-size: var(--text-sm); }
+.game-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 0.45rem; }
+.game-action {
+  font-family: var(--font-board); font-size: var(--text-xs); letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--steel);
+}
+.game-action:hover { color: var(--steel-strong); }
+.record-chip {
+  font-family: var(--font-board); font-size: 0.62em; font-weight: 700;
+  letter-spacing: 0.12em; color: var(--ink-on-steel); background: var(--steel);
+  padding: 0.15em 0.55em; vertical-align: 0.22em; margin-left: 0.5rem;
+}
 .game-score { font-family: var(--font-board); font-weight: 700; font-size: var(--text-lg); font-variant-numeric: tabular-nums; text-align: right; }
 .game-score .tag { display: inline-block; font-size: var(--text-xs); letter-spacing: 0.2em; margin-right: 0.5rem; }
 .game-score .W { color: var(--win); }
