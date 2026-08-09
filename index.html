@@ -83,11 +83,12 @@
         <path class="draw accent" style="--len: 750;" d="M300 168 L432 300 L300 432 L168 300 Z" />
         <!-- mound + rubber -->
         <circle cx="300" cy="300" r="30" />
-        <!-- bases -->
-        <rect x="292" y="160" width="16" height="16" transform="rotate(45 300 168)" />
-        <rect x="424" y="292" width="16" height="16" transform="rotate(45 432 300)" />
-        <rect x="292" y="424" width="16" height="16" transform="rotate(45 300 432)" />
-        <rect x="160" y="292" width="16" height="16" transform="rotate(45 168 300)" />
+        <!-- bases: small diamonds tucked into each infield corner, their outer
+             edges flush with the baselines so the lines flow in cleanly -->
+        <path d="M300 168 L312 180 L300 192 L288 180 Z" />
+        <path d="M432 300 L420 288 L408 300 L420 312 Z" />
+        <path d="M300 432 L312 420 L300 408 L288 420 Z" />
+        <path d="M168 300 L180 288 L192 300 L180 312 Z" />
       </svg>
       <div class="container">
         <div class="hero-copy">
