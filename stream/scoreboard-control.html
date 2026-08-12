@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#060910" />
+<title>Scoreboard Control — Blue Steel</title>
+<meta name="robots" content="noindex" />
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+<link rel="preconnect" href="https://api.fontshare.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=supreme@400,500,700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --field:#0a0e16; --field-deep:#060910; --dugout:#121a29; --dugout-2:#0e1520;
+    --chalk:#f2f0e9; --muted:#93a3b8; --faint:#5f7086;
+    --steel:#7fc0ef; --steel-strong:#a9d8fa;
+    --clay:#c4653b; --clay-bright:#e0794a;
+    --win:#8fe3b0; --loss:#ef9c8b;
+    --chalk-line:rgba(242,240,233,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{min-height:100%}
+  body{font-family:'Supreme','Helvetica Neue',Arial,sans-serif;color:var(--chalk);
+    background:radial-gradient(60rem 30rem at 82% -12%, rgba(127,192,239,.07), transparent 62%),
+      linear-gradient(180deg,var(--field-deep),#0b1220);
+    padding:max(12px,env(safe-area-inset-top)) 12px calc(28px + env(safe-area-inset-bottom));
+    -webkit-user-select:none;user-select:none}
+  .wrap{max-width:520px;margin-inline:auto}
+  h1{font-family:'Tanker','Arial Black',sans-serif;font-weight:400;letter-spacing:.06em;
+    text-transform:uppercase;font-size:1.25rem;line-height:1}
+  .k{font-family:'Martian Mono',monospace;font-size:.56rem;letter-spacing:.28em;color:var(--faint);text-transform:uppercase}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.8rem}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--faint);display:inline-block;margin-right:.35rem}
+  .dot.live{background:var(--win);box-shadow:0 0 9px var(--win)}
+  .ghost{font-family:'Martian Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);border:1px solid var(--chalk-line);background:rgba(10,14,22,.6);padding:.45rem .6rem;border-radius:6px}
+
+  .card{background:rgba(18,26,41,.55);border:1px solid var(--chalk-line);border-radius:12px;
+    padding:.9rem;margin-bottom:.7rem}
+  .card h2{font-family:'Martian Mono',monospace;font-size:.6rem;letter-spacing:.2em;color:var(--muted);
+    text-transform:uppercase;margin-bottom:.6rem}
+
+  /* summary strip */
+  .summary{font-family:'Martian Mono',monospace;font-size:.82rem;color:var(--steel-strong);
+    text-align:center;letter-spacing:.04em;background:rgba(6,9,16,.5);border:1px solid var(--chalk-line);
+    border-radius:8px;padding:.55rem;margin-bottom:.7rem}
+
+  /* score cards */
+  .score{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+  .tcard{background:rgba(10,14,22,.55);border:1px solid var(--chalk-line);border-radius:12px;padding:.7rem;text-align:center}
+  .tcard.accent{border-color:rgba(127,192,239,.5);box-shadow:inset 0 0 0 1px rgba(127,192,239,.18)}
+  .tcard .name{width:100%;text-align:center;font-family:'Tanker','Arial Black',sans-serif;letter-spacing:.04em;
+    text-transform:uppercase;font-size:1rem;color:var(--chalk);background:transparent;border:none;
+    border-bottom:1px dashed transparent;padding:.15rem 0}
+  .tcard .name:focus{outline:none;border-bottom-color:var(--steel)}
+  .tcard.accent .name{color:var(--steel-strong)}
+  .bat-tag{font-family:'Martian Mono',monospace;font-size:.5rem;letter-spacing:.18em;color:var(--clay-bright);
+    text-transform:uppercase;height:.8rem;visibility:hidden}
+  .tcard.batting .bat-tag{visibility:visible}
+  .bignum{font-family:'Martian Mono',monospace;font-weight:700;font-size:3.1rem;line-height:1;margin:.1rem 0 .35rem}
+  .pm{display:flex;gap:.5rem;justify-content:center}
+  .pm button{flex:1;font-family:'Martian Mono',monospace;font-weight:700;font-size:1.5rem;
+    background:rgba(242,240,233,.05);border:1px solid var(--chalk-line);color:var(--chalk);border-radius:9px;
+    padding:.5rem 0;min-height:52px}
+  .pm button.plus{background:linear-gradient(180deg,rgba(127,192,239,.22),rgba(127,192,239,.06));border-color:rgba(127,192,239,.45);color:var(--steel-strong)}
+  .pm button:active{transform:scale(.95)}
+
+  /* generic button rows */
+  .seg{display:flex;gap:.4rem;flex-wrap:wrap}
+  .seg .lab{font-family:'Martian Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--faint);
+    text-transform:uppercase;align-self:center;width:2.4rem}
+  .pill{flex:1;min-width:2.6rem;min-height:46px;font-family:'Martian Mono',monospace;font-weight:700;font-size:1.05rem;
+    background:rgba(242,240,233,.05);border:1px solid var(--chalk-line);color:var(--chalk);border-radius:9px}
+  .pill.on{background:linear-gradient(180deg,var(--steel),var(--steel-strong));color:#081019;border-color:var(--steel)}
+  .pill.on.clay{background:linear-gradient(180deg,var(--clay-bright),var(--clay));color:#170b06;border-color:var(--clay-bright)}
+  .pill:active{transform:scale(.96)}
+  .crow{display:flex;align-items:center;gap:.4rem;margin-bottom:.5rem}
+  .crow:last-child{margin-bottom:0}
+
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+  .btn{min-height:50px;font-family:'Martian Mono',monospace;font-weight:700;font-size:.78rem;letter-spacing:.06em;
+    text-transform:uppercase;background:rgba(242,240,233,.05);border:1px solid var(--chalk-line);color:var(--chalk);border-radius:10px}
+  .btn.primary{background:linear-gradient(180deg,rgba(127,192,239,.22),rgba(127,192,239,.06));border-color:rgba(127,192,239,.45);color:var(--steel-strong)}
+  .btn.clay{background:linear-gradient(180deg,rgba(224,121,74,.22),rgba(224,121,74,.06));border-color:rgba(224,121,74,.5);color:var(--clay-bright)}
+  .btn:active{transform:scale(.97)}
+
+  .inning-row{display:flex;align-items:center;gap:.5rem}
+  .inning-row .num{flex:1;text-align:center;font-family:'Martian Mono',monospace;font-weight:700;font-size:1.3rem}
+  .halfbtn{min-width:112px}
+
+  .rowline{display:flex;gap:.5rem;align-items:center}
+  input[type=text]{font:inherit;color:var(--chalk);background:rgba(242,240,233,.05);border:1px solid var(--chalk-line);
+    border-radius:8px;padding:.6rem .7rem;flex:1;min-width:0}
+  input[type=text]:focus{outline:none;border-color:var(--steel)}
+  .toggle{display:flex;gap:.4rem}
+  .toggle .pill{min-height:42px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+
+  .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
+    background:rgba(10,14,22,.95);border:1px solid var(--chalk-line);color:var(--chalk);padding:.6rem 1rem;border-radius:999px;
+    font-family:'Martian Mono',monospace;font-size:.72rem;opacity:0;transition:all .25s;pointer-events:none;z-index:50}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.err{border-color:var(--loss);color:var(--loss)}
+
+  /* login */
+  #login{max-width:360px;margin:8vh auto 0}
+  #login .field{display:grid;gap:.35rem;margin-top:.8rem}
+  #login label{font-family:'Martian Mono',monospace;font-size:.6rem;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}
+  #login input{font:inherit;color:var(--chalk);background:rgba(242,240,233,.05);border:1px solid var(--chalk-line);border-radius:8px;padding:.7rem .8rem}
+  #login .msg{margin-top:.7rem;font-family:'Martian Mono',monospace;font-size:.72rem;color:var(--loss);min-height:1rem}
+  .hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- LOGIN -->
+  <div id="login" class="card">
+    <div class="k">Blue Steel</div>
+    <h1 style="margin-top:.3rem">Scoreboard Control</h1>
+    <p class="k" style="margin-top:.5rem;letter-spacing:.08em;color:var(--muted)">Sign in with your team admin username &amp; PIN.</p>
+    <div class="field"><label for="u">Username</label><input id="u" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" /></div>
+    <div class="field"><label for="p">PIN</label><input id="p" type="password" autocomplete="current-password" inputmode="numeric" /></div>
+    <button class="btn primary" id="signin" style="width:100%;margin-top:1rem">Sign in</button>
+    <p class="msg" id="loginmsg"></p>
+  </div>
+
+  <!-- CONTROL -->
+  <div id="panel" class="hide">
+    <div class="topbar">
+      <div><span class="dot" id="conn"></span><span class="k" id="connlabel">Connecting…</span></div>
+      <div style="display:flex;gap:.5rem">
+        <button class="ghost" id="hidebtn">Hide overlay</button>
+        <button class="ghost" id="signout">Sign out</button>
+      </div>
+    </div>
+
+    <div class="summary" id="summary">—</div>
+
+    <!-- scores -->
+    <div class="score">
+      <div class="tcard" id="c-away">
+        <div class="bat-tag">◄ At bat</div>
+        <input class="name" id="n-away" value="Away" maxlength="18" />
+        <div class="bignum" id="s-away">0</div>
+        <div class="pm"><button data-side="away" data-d="-1">−</button><button class="plus" data-side="away" data-d="1">＋</button></div>
+      </div>
+      <div class="tcard" id="c-home">
+        <div class="bat-tag">◄ At bat</div>
+        <input class="name" id="n-home" value="Blue Steel" maxlength="18" />
+        <div class="bignum" id="s-home">0</div>
+        <div class="pm"><button data-side="home" data-d="-1">−</button><button class="plus" data-side="home" data-d="1">＋</button></div>
+      </div>
+    </div>
+
+    <!-- quick at-bat -->
+    <div class="card" style="margin-top:.7rem">
+      <h2>At bat</h2>
+      <div class="actions" style="grid-template-columns:1fr 1fr 1fr 1fr">
+        <button class="btn primary" id="q-ball">Ball</button>
+        <button class="btn clay" id="q-strike">Strike</button>
+        <button class="btn" id="q-foul">Foul</button>
+        <button class="btn clay" id="q-out">Out</button>
+      </div>
+    </div>
+
+    <!-- count -->
+    <div class="card">
+      <h2>Count</h2>
+      <div class="crow"><span class="lab">Balls</span><div class="seg" id="seg-balls"></div></div>
+      <div class="crow"><span class="lab">Strk</span><div class="seg" id="seg-strikes"></div></div>
+      <div class="crow"><span class="lab">Outs</span><div class="seg" id="seg-outs"></div></div>
+    </div>
+
+    <!-- bases -->
+    <div class="card">
+      <h2>Runners on</h2>
+      <div class="seg">
+        <button class="pill clay" data-base="base1" id="base1">1st</button>
+        <button class="pill clay" data-base="base2" id="base2">2nd</button>
+        <button class="pill clay" data-base="base3" id="base3">3rd</button>
+      </div>
+    </div>
+
+    <!-- inning -->
+    <div class="card">
+      <h2>Inning</h2>
+      <div class="inning-row">
+        <button class="pill" id="inn-minus" style="max-width:72px">−</button>
+        <div class="num" id="inn-num">1</div>
+        <button class="pill" id="inn-plus" style="max-width:72px">＋</button>
+        <button class="pill halfbtn clay" id="half">▲ Top</button>
+      </div>
+      <div class="actions" style="margin-top:.6rem">
+        <button class="btn" id="newhalf">New ½ inning</button>
+        <button class="btn" id="clearcount">Clear count</button>
+      </div>
+    </div>
+
+    <!-- status + setup -->
+    <div class="card">
+      <h2>Banner &amp; setup</h2>
+      <div class="rowline">
+        <input type="text" id="status" placeholder="Banner (e.g. FINAL, RAIN DELAY)" maxlength="22" />
+        <button class="btn" id="status-set" style="max-width:90px">Set</button>
+      </div>
+      <div class="actions" style="grid-template-columns:1fr 1fr 1fr;margin-top:.5rem">
+        <button class="btn clay" data-status="MID">MID</button>
+        <button class="btn clay" data-status="FINAL">FINAL</button>
+        <button class="btn" data-status="">Clear</button>
+      </div>
+      <div class="crow" style="margin-top:.7rem">
+        <span class="lab" style="width:auto">Blue&nbsp;Steel&nbsp;is</span>
+        <div class="toggle" style="flex:1">
+          <button class="pill" data-accent="away" id="acc-away">Away</button>
+          <button class="pill" data-accent="home" id="acc-home">Home</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top:.2rem">
+      <button class="btn clay" id="reset">Reset game 0–0</button>
+      <button class="btn primary" id="showbtn">Show overlay</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { adminLogin, getScoreboard, onScoreboard, setScoreboard } from './scoreboard-shared.js';
+
+  const $ = (id) => document.getElementById(id);
+  const CREDS_KEY = 'bs_scoreboard_creds';
+  let creds = null;
+  try { creds = JSON.parse(localStorage.getItem(CREDS_KEY) || 'null'); } catch { creds = null; }
+
+  // Local mirror of server state.
+  let S = { away_name:'Away', home_name:'Blue Steel', away_score:0, home_score:0,
+    inning:1, half:'top', balls:0, strikes:0, outs:0,
+    base1:false, base2:false, base3:false, accent_side:'home', status:null, visible:true };
+
+  let toastT;
+  function toast(msg, err){ const t=$('toast'); t.textContent=msg; t.className='toast show'+(err?' err':''); clearTimeout(toastT); toastT=setTimeout(()=>t.className='toast',1400); }
+
+  // ---------- login ----------
+  async function trySignIn(username, pin){
+    const ok = await adminLogin(username, pin);
+    if(!ok) throw new Error('Wrong username or PIN.');
+    creds = { username, pin };
+    localStorage.setItem(CREDS_KEY, JSON.stringify(creds));
+  }
+  $('signin').addEventListener('click', async () => {
+    const u=$('u').value.trim(), p=$('p').value;
+    if(!u||!p){ $('loginmsg').textContent='Enter username and PIN.'; return; }
+    $('loginmsg').textContent='Signing in…';
+    try { await trySignIn(u,p); $('loginmsg').textContent=''; boot(); }
+    catch(e){ $('loginmsg').textContent=e.message; }
+  });
+  ['u','p'].forEach(id=>$(id).addEventListener('keydown',e=>{ if(e.key==='Enter') $('signin').click(); }));
+  $('signout').addEventListener('click', ()=>{ localStorage.removeItem(CREDS_KEY); location.reload(); });
+
+  // ---------- send ----------
+  function push(patch){
+    Object.assign(S, patch);
+    reflect();
+    if(!creds) return;
+    setScoreboard(creds, patch).then(()=>toast('Saved ✓')).catch(e=>toast(e.message||'Failed', true));
+  }
+
+  // ---------- baseball logic ----------
+  const battingSide = () => S.half==='top' ? 'away' : 'home';
+  function nextHalf(){
+    const patch = { balls:0, strikes:0, outs:0, base1:false, base2:false, base3:false };
+    if(S.half==='top') patch.half='bottom';
+    else { patch.half='top'; patch.inning=Math.min(99,(S.inning||1)+1); }
+    return patch;
+  }
+  function addOut(){
+    const o=(S.outs||0)+1;
+    if(o>=3) push(nextHalf());
+    else push({ outs:o, balls:0, strikes:0 });
+  }
+  function addStrike(){ const st=(S.strikes||0)+1; if(st>=3) addOut(); else push({ strikes:st }); }
+  function addFoul(){ push({ strikes:Math.min(2,(S.strikes||0)+1) }); }
+  function addBall(){
+    const b=(S.balls||0)+1;
+    if(b<4){ push({ balls:b }); return; }
+    // walk: force-advance runners; run scores only if bases loaded
+    const p={ balls:0, strikes:0 };
+    const side=battingSide();
+    if(S.base1 && S.base2 && S.base3){ p[side+'_score']=Math.max(0,(S[side+'_score']||0)+1); p.base1=p.base2=p.base3=true; }
+    else if(S.base1 && S.base2){ p.base3=true; p.base2=true; p.base1=true; }
+    else if(S.base1){ p.base2=true; p.base1=true; }
+    else { p.base1=true; }
+    push(p);
+  }
+
+  // ---------- reflect state to controls ----------
+  function seg(el, n, cur, cls){
+    el.innerHTML='';
+    for(let i=0;i<=n;i++){
+      const b=document.createElement('button');
+      b.className='pill'+(cls?' '+cls:'')+(i===cur?' on':'');
+      b.textContent=i; b.dataset.v=i; el.appendChild(b);
+    }
+  }
+  function reflect(){
+    // scores + names (don't clobber a field being typed)
+    $('s-away').textContent=S.away_score; $('s-home').textContent=S.home_score;
+    if(document.activeElement!==$('n-away')) $('n-away').value=S.away_name;
+    if(document.activeElement!==$('n-home')) $('n-home').value=S.home_name;
+    $('c-away').classList.toggle('accent', S.accent_side==='away');
+    $('c-home').classList.toggle('accent', S.accent_side==='home');
+    $('c-away').classList.toggle('batting', S.half==='top');
+    $('c-home').classList.toggle('batting', S.half==='bottom');
+    // count segments
+    seg($('seg-balls'),3,S.balls,'');
+    seg($('seg-strikes'),2,S.strikes,'clay');
+    seg($('seg-outs'),2,S.outs,'clay');
+    // bases
+    $('base1').classList.toggle('on', !!S.base1);
+    $('base2').classList.toggle('on', !!S.base2);
+    $('base3').classList.toggle('on', !!S.base3);
+    // inning
+    $('inn-num').textContent=S.inning;
+    $('half').textContent = S.half==='top' ? '▲ Top' : '▼ Bot';
+    // accent toggle
+    $('acc-away').classList.toggle('on', S.accent_side==='away');
+    $('acc-home').classList.toggle('on', S.accent_side==='home');
+    // status field
+    if(document.activeElement!==$('status')) $('status').value=S.status||'';
+    // hide/show button label
+    $('hidebtn').textContent = S.visible ? 'Hide overlay' : 'Overlay hidden';
+    $('showbtn').textContent = S.visible ? 'Overlay live' : 'Show overlay';
+    // summary
+    const a=S.away_name, h=S.home_name;
+    const arrow=S.half==='top'?'▲':'▼';
+    $('summary').textContent = `${a} ${S.away_score} – ${S.home_score} ${h}  ·  ${arrow}${S.inning}  ·  ${S.balls}-${S.strikes}, ${S.outs} out`;
+  }
+
+  // ---------- wire controls ----------
+  document.querySelectorAll('.pm button').forEach(b=>b.addEventListener('click',()=>{
+    const side=b.dataset.side, d=+b.dataset.d;
+    push({ [side+'_score']: Math.max(0,(S[side+'_score']||0)+d) });
+  }));
+  $('q-ball').addEventListener('click', addBall);
+  $('q-strike').addEventListener('click', addStrike);
+  $('q-foul').addEventListener('click', addFoul);
+  $('q-out').addEventListener('click', addOut);
+
+  // count segment taps (direct set / correction)
+  ['seg-balls','seg-strikes','seg-outs'].forEach(segId=>{
+    const key = segId.split('-')[1]; // balls/strikes/outs
+    $(segId).addEventListener('click', e=>{ const b=e.target.closest('.pill'); if(!b) return; push({ [key]: +b.dataset.v }); });
+  });
+
+  document.querySelectorAll('[data-base]').forEach(b=>b.addEventListener('click',()=>{
+    const k=b.dataset.base; push({ [k]: !S[k] });
+  }));
+
+  $('inn-minus').addEventListener('click', ()=>push({ inning: Math.max(1,(S.inning||1)-1) }));
+  $('inn-plus').addEventListener('click', ()=>push({ inning: Math.min(99,(S.inning||1)+1) }));
+  $('half').addEventListener('click', ()=>push({ half: S.half==='top'?'bottom':'top' }));
+  $('newhalf').addEventListener('click', ()=>push(nextHalf()));
+  $('clearcount').addEventListener('click', ()=>push({ balls:0, strikes:0, outs:0 }));
+
+  // names (debounced)
+  let nameT;
+  ['n-away','n-home'].forEach(id=>{
+    const key = id==='n-away' ? 'away_name' : 'home_name';
+    $(id).addEventListener('input', ()=>{ clearTimeout(nameT); nameT=setTimeout(()=>push({ [key]: $(id).value.trim() || (key==='home_name'?'Blue Steel':'Away') }), 500); });
+    $(id).addEventListener('blur', ()=>{ clearTimeout(nameT); push({ [key]: $(id).value.trim() || (key==='home_name'?'Blue Steel':'Away') }); });
+  });
+
+  // status
+  $('status-set').addEventListener('click', ()=>push({ status: $('status').value.trim() || null }));
+  document.querySelectorAll('[data-status]').forEach(b=>b.addEventListener('click',()=>{
+    const v=b.dataset.status;
+    push({ status: v==='' ? null : (v==='MID' ? `MID ${S.inning}` : v) });
+  }));
+
+  // accent
+  document.querySelectorAll('[data-accent]').forEach(b=>b.addEventListener('click',()=>push({ accent_side:b.dataset.accent })));
+
+  // visibility
+  $('hidebtn').addEventListener('click', ()=>push({ visible:false }));
+  $('showbtn').addEventListener('click', ()=>push({ visible:true }));
+
+  $('reset').addEventListener('click', ()=>{
+    if(!confirm('Reset the game to 0–0, inning 1?')) return;
+    push({ away_score:0, home_score:0, inning:1, half:'top', balls:0, strikes:0, outs:0,
+      base1:false, base2:false, base3:false, status:null });
+  });
+
+  // ---------- boot ----------
+  async function boot(){
+    $('login').classList.add('hide');
+    $('panel').classList.remove('hide');
+    try { const s=await getScoreboard(); S={...S,...s}; reflect();
+      $('conn').classList.add('live'); $('connlabel').textContent='Live';
+    } catch(e){ $('connlabel').textContent='Load failed'; toast('Could not load scoreboard', true); }
+    onScoreboard((s)=>{ S={...S,...s}; reflect(); });
+  }
+
+  // auto-login if creds saved and still valid
+  (async function init(){
+    if(creds){
+      try { if(await adminLogin(creds.username, creds.pin)) return boot(); } catch {}
+      localStorage.removeItem(CREDS_KEY); creds=null;
+    }
+  })();
+</script>
+</body>
+</html>
