@@ -17,7 +17,7 @@
     --chalk:#f2f0e9; --muted:#93a3b8; --faint:#5f7086;
     --steel:#7fc0ef; --steel-strong:#a9d8fa;
     --clay:#c4653b; --clay-bright:#e0794a;
-    --chalk-line:rgba(242,240,233,.16);
+    --chalk-line:rgba(242,240,233,.16); --win:#8fe3b0;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Supreme','Helvetica Neue',Arial,sans-serif;color:var(--chalk);
@@ -77,6 +77,20 @@
     font-size:1.05rem;margin-bottom:.5rem}
   .grid{display:grid;grid-template-columns:auto 1fr;gap:.35rem 1rem;font-size:.9rem;color:var(--muted)}
   .grid b{color:var(--chalk);font-weight:500}
+  .srcs{display:grid;gap:.7rem;margin-top:1.15rem}
+  .src{border:1px solid var(--chalk-line);border-radius:8px;padding:.7rem .8rem;background:rgba(6,9,16,.35)}
+  .src-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:.55rem;margin-bottom:.5rem}
+  .src-h b{font-family:'Tanker','Arial Black',sans-serif;font-weight:400;letter-spacing:.03em;text-transform:uppercase;font-size:.95rem}
+  .src-h span{color:var(--muted);font-size:.82rem}
+  .copyrow{display:flex;gap:.4rem}
+  .copyrow input{flex:1;min-width:0;font-family:'Martian Mono',monospace;font-size:.76rem;color:var(--steel-strong);
+    background:rgba(10,14,22,.7);border:1px solid var(--chalk-line);border-radius:6px;padding:.5rem .6rem}
+  .copyrow input:focus{outline:none;border-color:var(--steel)}
+  button.copy{font-family:'Martian Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+    padding:.5rem .85rem;border:1px solid rgba(127,192,239,.45);color:var(--steel-strong);background:rgba(127,192,239,.1);
+    border-radius:6px;cursor:pointer;flex:0 0 auto}
+  button.copy:hover{background:rgba(127,192,239,.2)}
+  button.copy.done{border-color:var(--win);color:var(--win);background:rgba(143,227,176,.14)}
   footer{color:var(--faint);font-size:.8rem;font-family:'Martian Mono',monospace;letter-spacing:.1em;
     text-align:center;margin-top:2rem}
 </style>
@@ -90,19 +104,48 @@
       <div class="k">Blue Steel Baseball · OBS Pack</div>
     </div>
   </header>
-  <p class="lede">Three brand-matched, self-contained HTML animations for your game streams. Each is a
-    <b>Browser Source</b> in OBS — no plugins, no downloads, fonts and logo baked in. Everything renders at
-    <span class="pill">1920×1080</span>; set your Browser Source to that size and <span class="pill">60 FPS</span>.</p>
+  <p class="lede">Your full streaming kit — a realtime <b>scoreboard</b> you run from your phone, plus brand-matched
+    <b>transitions</b> and hold screens. Everything is an OBS <b>Browser Source</b> (no plugins), renders at
+    <span class="pill">1920×1080</span>, and is self-contained.</p>
 
   <div class="setup">
-    <h3>Add any of these to OBS</h3>
+    <h3>How to set it up in OBS</h3>
+    <p style="color:var(--muted);font-size:.92rem;margin:.1rem 0 1rem">Add one Browser Source per scene, paste its link, set the size. These point at the live app on Vercel, so they always work.</p>
     <div class="grid">
-      <b>Source type</b><span>Sources → <b>+</b> → <b>Browser</b></span>
-      <b>URL</b><span>the hosted link (e.g. <code>https://bluesteelbaseball.com/stream/starting-soon.html</code>) — or tick <b>Local file</b> and pick the <code>.html</code></span>
-      <b>Size</b><span>Width <b>1920</b> · Height <b>1080</b> · FPS <b>60</b></span>
-      <b>Custom CSS</b><span>leave the default (already sets a transparent page) — the overlays cut out over your video</span>
-      <b>Replay on cue</b><span>tick <b>“Refresh browser when scene becomes active”</b> so the animation restarts every time you switch to it</span>
+      <b>Add a source</b><span>In a scene: <b>Sources → + → Browser</b>, paste a URL below, click <b>OK</b>.</span>
+      <b>Size</b><span>Width <b>1920</b> · Height <b>1080</b> · FPS <b>30</b> (use <b>60</b> for the stinger)</span>
+      <b>Transparency</b><span>Leave OBS’s default <b>Custom CSS</b> — it clears the page background so overlays sit over your video.</span>
+      <b>Scoreboard audio</b><span>Big-play sounds play through the browser source: check <b>“Control audio via OBS”</b> and unmute it in the <b>Audio Mixer</b>. Add <code>?mute=1</code> to the URL to silence.</span>
     </div>
+
+    <div class="srcs">
+      <div class="src">
+        <div class="src-h"><b>Live scoreboard</b><span>Overlay — leave it up on top of your camera. Do <em>not</em> tick “refresh when active.”</span></div>
+        <div class="copyrow"><input readonly value="https://bluesteelbaseball.vercel.app/stream/scoreboard" /><button class="copy">Copy</button></div>
+      </div>
+      <div class="src">
+        <div class="src-h"><b>Scoreboard control</b><span>Open on your <b>phone</b> (not in OBS) — sign in with your team PIN and run the game.</span></div>
+        <div class="copyrow"><input readonly value="https://bluesteelbaseball.vercel.app/stream/scoreboard-control" /><button class="copy">Copy</button></div>
+      </div>
+      <div class="src">
+        <div class="src-h"><b>Starting Soon</b><span>Full-screen hold before first pitch.</span></div>
+        <div class="copyrow"><input readonly value="https://bluesteelbaseball.vercel.app/stream/starting-soon" /><button class="copy">Copy</button></div>
+      </div>
+      <div class="src">
+        <div class="src-h"><b>Be Right Back</b><span>Between-innings break — pulls the live inning from the scoreboard.</span></div>
+        <div class="copyrow"><input readonly value="https://bluesteelbaseball.vercel.app/stream/brb" /><button class="copy">Copy</button></div>
+      </div>
+      <div class="src">
+        <div class="src-h"><b>Stinger wipe</b><span>Scene transition. Tick “Refresh browser when scene becomes active,” or record it for a true Stinger (transition point <b>600&nbsp;ms</b>).</span></div>
+        <div class="copyrow"><input readonly value="https://bluesteelbaseball.vercel.app/stream/stinger" /><button class="copy">Copy</button></div>
+      </div>
+      <div class="src">
+        <div class="src-h"><b>Logo bug</b><span>Small corner badge / lower-third over live video.</span></div>
+        <div class="copyrow"><input readonly value="https://bluesteelbaseball.vercel.app/stream/bug" /><button class="copy">Copy</button></div>
+      </div>
+    </div>
+
+    <div class="tip">Heads up: the custom domain <code>bluesteelbaseball.com</code> isn’t pointing at the app right now — use these <b>vercel.app</b> links and everything works.</div>
   </div>
 
   <!-- LIVE SCOREBOARD -->
@@ -120,14 +163,14 @@
         <div class="tip"><b>The control panel uses your existing team admin PIN</b> — the same username &amp; PIN as <code>/admin</code>. Anyone without it can’t touch your score.</div>
         <p><b>1 · Overlay in OBS</b> — add a <b>Browser Source</b>:</p>
         <ol>
-          <li>URL <code>https://bluesteelbaseball.com/stream/scoreboard.html</code></li>
+          <li>URL <code>https://bluesteelbaseball.vercel.app/stream/scoreboard</code> (copy it from the setup box above)</li>
           <li>Width <b>1920</b> · Height <b>1080</b> · FPS <b>30</b> (or 60)</li>
           <li>Leave it on top of your camera. It sits bottom-left by default — add <code>?pos=br</code>, <code>tl</code>, or <code>tr</code> to move it, or <code>?scale=1.3</code> to size it.</li>
           <li><b>Do not</b> tick “refresh when scene becomes active” here — it should stay live and persistent, not restart.</li>
         </ol>
         <p><b>2 · Control from your phone</b>:</p>
         <ol>
-          <li>On your phone, open <code>https://bluesteelbaseball.com/stream/scoreboard-control.html</code> and sign in once (it remembers you).</li>
+          <li>On your phone, open <code>https://bluesteelbaseball.vercel.app/stream/scoreboard-control</code> and sign in once (it remembers you).</li>
           <li>Tap <b>Ball / Strike / Foul / Out</b> and the count, outs, and half-innings advance automatically; tap bases and scores directly. Every tap updates the overlay instantly.</li>
           <li><b>Hide overlay</b> tucks the bug away between innings; <b>Show overlay</b> brings it back. <b>Banner</b> shows FINAL / MID / rain delay over the count.</li>
         </ol>
@@ -234,5 +277,18 @@
 
   <footer>BLUE STEEL BASEBALL · make edits in /stream · fonts &amp; skull embedded</footer>
 </div>
+
+<script>
+  document.querySelectorAll('button.copy').forEach((b) => {
+    b.addEventListener('click', async () => {
+      const input = b.previousElementSibling;
+      try { await navigator.clipboard.writeText(input.value); }
+      catch { input.focus(); input.select(); try { document.execCommand('copy'); } catch {} }
+      const prev = b.textContent;
+      b.textContent = 'Copied!'; b.classList.add('done');
+      setTimeout(() => { b.textContent = prev; b.classList.remove('done'); }, 1400);
+    });
+  });
+</script>
 </body>
 </html>
