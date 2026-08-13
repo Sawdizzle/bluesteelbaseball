@@ -113,9 +113,14 @@
   .hide{display:none!important}
 
   /* big plays + team photos */
-  .btn.big{min-height:58px;font-size:.94rem}
-  .minihint{font-family:'Martian Mono',monospace;font-size:.6rem;color:var(--faint);margin-top:.55rem;
-    letter-spacing:.03em;line-height:1.5}
+  .btn.big{min-height:56px;font-size:.9rem}
+  .fxgrid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+  .grouplab{font-family:'Martian Mono',monospace;font-size:.56rem;letter-spacing:.2em;color:var(--faint);
+    text-transform:uppercase;margin:.75rem 0 .45rem}
+  .grouplab:first-of-type{margin-top:.2rem}
+  .minihint{font-family:'Martian Mono',monospace;font-size:.6rem;color:var(--faint);margin-top:.7rem;
+    letter-spacing:.03em;line-height:1.6}
+  .minihint code{background:rgba(127,192,239,.12);color:var(--steel-strong);padding:.05rem .3rem;border-radius:3px}
   .photo{display:flex;align-items:center;gap:.75rem}
   .thumb{width:54px;height:54px;flex:none;border-radius:9px;border:1px solid var(--chalk-line);
     background:rgba(242,240,233,.05) center/contain no-repeat;display:grid;place-items:center;
@@ -184,14 +189,28 @@
 
     <!-- big plays -->
     <div class="card">
-      <h2>Big plays — animation + auto-score</h2>
-      <div class="actions" style="grid-template-columns:1fr 1fr">
+      <h2>Big plays — animation + sound</h2>
+      <div class="grouplab">Hits</div>
+      <div class="fxgrid">
         <button class="btn primary big" id="fx-hr">Home Run</button>
+        <button class="btn big" id="fx-3b">Triple</button>
+        <button class="btn big" id="fx-2b">Double</button>
+        <button class="btn big" id="fx-1b">Base Hit</button>
+      </div>
+      <div class="grouplab">On base &amp; scoring</div>
+      <div class="fxgrid">
         <button class="btn primary big" id="fx-run">Run Scores</button>
+        <button class="btn big" id="fx-sb">Stolen Base</button>
         <button class="btn big" id="fx-bb">Walk / BB</button>
         <button class="btn big" id="fx-hbp">HBP</button>
       </div>
-      <p class="minihint">Fires the animation on the overlay and updates the batting team’s score &amp; bases automatically. HR clears the bases and scores every runner.</p>
+      <div class="grouplab">Outs</div>
+      <div class="fxgrid">
+        <button class="btn clay big" id="fx-k">Strikeout</button>
+        <button class="btn clay big" id="fx-out">Out</button>
+        <button class="btn clay big" id="fx-dp">Double Play</button>
+      </div>
+      <p class="minihint">Each plays an animation + sound on the overlay and updates the score, bases &amp; outs. HR clears the bases and scores every runner (Grand Slam when loaded). Sound comes out of the OBS browser source — add <code>?mute=1</code> to the overlay URL to silence it.</p>
     </div>
 
     <!-- count -->
@@ -355,14 +374,30 @@
     const p=walkAdvance(); p.balls=0; p.strikes=0; push(p);   // 4th ball = walk (no animation)
   }
 
-  // big plays: play the overlay animation + apply the scoring
-  function fxHomeRun(){
-    const side=battingSide(); const runs=1+runnersOn();
-    push({ [side+'_score']:Math.max(0,(S[side+'_score']||0)+runs),
-      base1:false, base2:false, base3:false, balls:0, strikes:0, fx:'homerun' });
-  }
-  function fxRun(){ const side=battingSide(); push({ [side+'_score']:Math.max(0,(S[side+'_score']||0)+1), fx:'run' }); }
-  function fxWalk(kind){ const p=walkAdvance(); p.balls=0; p.strikes=0; p.fx=kind; push(p); }
+  // big plays: play the overlay animation + apply scoring / bases / outs
+  const bscore = (p, n) => { const s = battingSide(); p[s+'_score'] = Math.max(0, (S[s+'_score']||0) + n); };
+  function playHR(){ const runs = 1 + runnersOn();
+    const p = { base1:false, base2:false, base3:false, balls:0, strikes:0, fx: runnersOn()===3 ? 'grandslam' : 'homerun' };
+    bscore(p, runs); push(p); }
+  function playTriple(){ const runs = runnersOn();
+    const p = { base1:false, base2:false, base3:true, balls:0, strikes:0, fx:'triple' };
+    if (runs) bscore(p, runs); push(p); }
+  function playDouble(){ const runs = (S.base2?1:0)+(S.base3?1:0);
+    const p = { base1:false, base2:true, base3:!!S.base1, balls:0, strikes:0, fx:'double' };
+    if (runs) bscore(p, runs); push(p); }
+  function playSingle(){ const runs = (S.base3?1:0);
+    const p = { base1:true, base2:!!S.base1, base3:!!S.base2, balls:0, strikes:0, fx:'hit' };
+    if (runs) bscore(p, runs); push(p); }
+  function playRun(){ const p = { fx:'run' }; bscore(p, 1); push(p); }
+  function playSteal(){ push({ fx:'steal' }); }              // animation only — set the base by hand
+  function playWalk(kind){ const p = walkAdvance(); p.balls=0; p.strikes=0; p.fx=kind; push(p); }
+  function outWithFx(fx){ const o=(S.outs||0)+1;
+    if (o>=3){ const p=nextHalf(); p.fx=fx; push(p); } else push({ outs:o, balls:0, strikes:0, fx }); }
+  function playStrikeout(){ outWithFx('strikeout'); }
+  function playOut(){ outWithFx('out'); }
+  function playDP(){ const o=(S.outs||0)+2;
+    if (o>=3){ const p=nextHalf(); p.fx='doubleplay'; push(p); }
+    else push({ outs:o, base1:false, balls:0, strikes:0, fx:'doubleplay' }); }
 
   // shrink an uploaded photo to a small square-ish logo data URI
   function resizeImage(file, max=160){
@@ -445,10 +480,17 @@
   $('q-out').addEventListener('click', addOut);
 
   // big plays
-  $('fx-hr').addEventListener('click', fxHomeRun);
-  $('fx-run').addEventListener('click', fxRun);
-  $('fx-bb').addEventListener('click', ()=>fxWalk('walk'));
-  $('fx-hbp').addEventListener('click', ()=>fxWalk('hbp'));
+  $('fx-hr').addEventListener('click', playHR);
+  $('fx-3b').addEventListener('click', playTriple);
+  $('fx-2b').addEventListener('click', playDouble);
+  $('fx-1b').addEventListener('click', playSingle);
+  $('fx-run').addEventListener('click', playRun);
+  $('fx-sb').addEventListener('click', playSteal);
+  $('fx-bb').addEventListener('click', ()=>playWalk('walk'));
+  $('fx-hbp').addEventListener('click', ()=>playWalk('hbp'));
+  $('fx-k').addEventListener('click', playStrikeout);
+  $('fx-out').addEventListener('click', playOut);
+  $('fx-dp').addEventListener('click', playDP);
 
   // team photos
   ['away','home'].forEach(side=>{

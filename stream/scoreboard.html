@@ -145,6 +145,10 @@
     clip-path:polygon(13px 0,100% 0,100% calc(100% - 13px),calc(100% - 13px) 100%,0 100%,0 13px);
     box-shadow:0 16px 44px rgba(0,0,0,.5)}
   .fx-tag.steel{background:linear-gradient(180deg,var(--steel-strong),var(--steel));color:#081019}
+  .fx-tag.gray{background:linear-gradient(180deg,#8fa0b4,#4a5768);color:#0a0f16}
+  .fx-big.k .lead{background:linear-gradient(180deg,#ff9a86,var(--clay-bright) 52%,#b4331c);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 8px 26px rgba(224,121,74,.55)) drop-shadow(0 2px 2px rgba(0,0,0,.45))}
   .fx-tag.show{animation:fxtag 2.3s ease forwards}
   @keyframes fxtag{0%{opacity:0;transform:translate(-50%,22px) scale(.92)}
     13%{opacity:1;transform:translate(-50%,0) scale(1)}
@@ -223,14 +227,64 @@
     }
   }
 
-  // ---- big-play animations ----
+  // ---- synthesized sound (plays out through the OBS browser source; ?mute=1 to silence) ----
+  const MUTE = q.has('mute') || q.get('sound') === '0';
+  const VOL = Math.max(0, Math.min(1, parseFloat(q.get('vol')) || 0.8));
+  let AC = null;
+  function actx(){ try { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume().catch(() => {}); } catch { AC = null; } return AC; }
+  function envGain(c, t0, a, d, peak){ const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak * VOL), t0 + a);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d); return g; }
+  function beep(freq, t0, dur, o1 = {}){ const c = actx(); if (!c) return;
+    const o = c.createOscillator(); o.type = o1.type || 'sine';
+    o.frequency.setValueAtTime(freq, t0);
+    if (o1.slideTo) o.frequency.exponentialRampToValueAtTime(o1.slideTo, t0 + dur);
+    const g = envGain(c, t0, Math.min(0.02, dur * 0.25), dur, o1.peak != null ? o1.peak : 0.25);
+    o.connect(g).connect(c.destination); o.start(t0); o.stop(t0 + dur + 0.05); }
+  function noise(t0, dur, o1 = {}){ const c = actx(); if (!c) return;
+    const n = Math.floor(c.sampleRate * dur), buf = c.createBuffer(1, n, c.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type = o1.type || 'bandpass';
+    f.frequency.setValueAtTime(o1.freq || 1200, t0);
+    if (o1.slideTo) f.frequency.exponentialRampToValueAtTime(o1.slideTo, t0 + dur);
+    f.Q.value = o1.q || 0.7;
+    const g = envGain(c, t0, 0.005, dur, o1.peak != null ? o1.peak : 0.3);
+    src.connect(f).connect(g).connect(c.destination); src.start(t0); src.stop(t0 + dur + 0.02); }
+  const crack = (t) => noise(t, 0.05, { peak: 0.5, freq: 2500, q: 1 });
+  function sfx(kind){
+    if (MUTE) return; const c = actx(); if (!c) return; const t = c.currentTime + 0.02;
+    switch (kind){
+      case 'homerun': case 'grandslam':
+        [523.25,659.25,783.99,1046.5].forEach((f,i)=>beep(f,t+i*0.12,0.2,{type:'square',peak:0.22}));
+        beep(1318.5,t+0.5,0.55,{type:'square',peak:0.18});
+        noise(t,0.9,{peak:0.15,freq:3500,type:'highpass'}); break;   // crowd swell
+      case 'strikeout':
+        beep(420,t,0.5,{type:'sawtooth',peak:0.3,slideTo:70});       // whiff down
+        noise(t+0.02,0.16,{peak:0.18,freq:1600}); beep(150,t+0.44,0.26,{type:'square',peak:0.22}); break;
+      case 'hit':    crack(t); beep(880,t+0.02,0.12,{type:'triangle',peak:0.16}); break;
+      case 'double': crack(t); beep(659,t+0.03,0.14,{peak:0.18}); beep(988,t+0.16,0.16,{peak:0.18}); break;
+      case 'triple': crack(t); [659,880,1175].forEach((f,i)=>beep(f,t+0.03+i*0.11,0.14,{peak:0.18})); break;
+      case 'run':    beep(880,t,0.12,{peak:0.22}); beep(1318.5,t+0.1,0.2,{peak:0.22}); break;
+      case 'walk': case 'hbp': beep(392,t,0.14,{type:'triangle',peak:0.2}); beep(523.25,t+0.12,0.2,{type:'triangle',peak:0.2}); break;
+      case 'steal':  noise(t,0.35,{peak:0.22,freq:400,slideTo:3200}); break;   // whoosh
+      case 'out':    beep(140,t,0.24,{peak:0.32}); break;                       // thud
+      case 'doubleplay': beep(150,t,0.16,{peak:0.3}); beep(115,t+0.18,0.24,{peak:0.3}); break;
+      default:       beep(660,t,0.15,{peak:0.2});
+    }
+  }
+
+  // ---- big-play visuals ----
   const CONFETTI = ['#7fc0ef','#a9d8fa','#e0794a','#f2f0e9'];
-  function bigPlay(lead){
+  function bigPlay(lead, opts = {}){
+    const { confetti = true, scheme = '', sub = 'Blue Steel Baseball' } = opts;
     FX.innerHTML = '';
-    const b = document.createElement('div'); b.className = 'fx-big';
-    b.innerHTML = `<div class="lead">${lead}</div><div class="sub">Blue Steel Baseball</div>`;
+    const b = document.createElement('div'); b.className = 'fx-big' + (scheme ? ' ' + scheme : '');
+    b.innerHTML = `<div class="lead">${lead}</div>` + (sub ? `<div class="sub">${sub}</div>` : '');
     FX.appendChild(b); void b.offsetWidth; b.classList.add('show');
-    for (let i = 0; i < 44; i++){
+    if (confetti) for (let i = 0; i < 44; i++){
       const c = document.createElement('div'); c.className = 'confetti';
       c.style.left = (Math.random()*100) + 'vw';
       c.style.background = CONFETTI[i % CONFETTI.length];
@@ -240,17 +294,29 @@
     }
     clearTimeout(FX._t); FX._t = setTimeout(() => { FX.innerHTML = ''; }, 3700);
   }
-  function tagPlay(text, steel){
+  function tagPlay(text, variant = ''){
     FX.innerHTML = '';
-    const t = document.createElement('div'); t.className = 'fx-tag' + (steel ? ' steel' : '');
+    const t = document.createElement('div'); t.className = 'fx-tag' + (variant ? ' ' + variant : '');
     t.textContent = text; FX.appendChild(t); void t.offsetWidth; t.classList.add('show');
     clearTimeout(FX._t); FX._t = setTimeout(() => { FX.innerHTML = ''; }, 2400);
   }
+  const FX_MAP = {
+    homerun:  () => bigPlay('Home Run', { confetti: true }),
+    grandslam:() => bigPlay('Grand Slam', { confetti: true, sub: 'Bases Cleared' }),
+    strikeout:() => bigPlay('Strikeout', { confetti: false, scheme: 'k', sub: '' }),
+    triple:   () => tagPlay('Triple', 'steel'),
+    double:   () => tagPlay('Double', 'steel'),
+    hit:      () => tagPlay('Base Hit', 'steel'),
+    run:      () => tagPlay('Run Scores', ''),
+    walk:     () => tagPlay('Walk', 'steel'),
+    hbp:      () => tagPlay('Hit By Pitch', 'steel'),
+    steal:    () => tagPlay('Stolen Base', 'steel'),
+    out:      () => tagPlay('Out', 'gray'),
+    doubleplay:() => tagPlay('Double Play', 'gray'),
+  };
   function playFx(kind){
-    if (kind === 'homerun') return bigPlay('Home Run');
-    if (kind === 'run')     return tagPlay('Run Scores', false);
-    if (kind === 'walk')    return tagPlay('Walk', true);
-    if (kind === 'hbp')     return tagPlay('Hit By Pitch', true);
+    sfx(kind);
+    (FX_MAP[kind] || (() => tagPlay(String(kind).toUpperCase(), '')))();
   }
 
   const setText = (el, val, animate) => {
