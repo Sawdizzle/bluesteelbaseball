@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blue Steel — Line Score</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://api.fontshare.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=supreme@400,500,700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --field-deep:#060910; --dugout:#121a29; --chalk:#f2f0e9; --muted:#93a3b8; --faint:#5f7086;
+    --steel:#7fc0ef; --steel-strong:#a9d8fa; --clay:#c4653b; --clay-bright:#e0794a; --chalk-line:rgba(242,240,233,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:transparent;font-family:'Supreme','Helvetica Neue',Arial,sans-serif;color:var(--chalk)}
+  body.bg{background:linear-gradient(120deg,#20303f,#0a121e)}
+
+  #wrap{position:fixed;top:40px;left:50%;transform:translateX(-50%) translateY(-16px);opacity:0;
+    transition:transform .5s cubic-bezier(.2,.85,.2,1),opacity .5s ease}
+  #wrap.show{transform:translateX(-50%) translateY(0);opacity:1}
+  #wrap.bottom{top:auto;bottom:40px}
+  #wrap.tl{left:40px;transform:translateY(-16px)} #wrap.tl.show{transform:translateY(0)}
+
+  table{border-collapse:collapse;background:linear-gradient(180deg,rgba(18,26,41,.96),rgba(10,14,22,.96));
+    border:1px solid var(--chalk-line);box-shadow:0 16px 40px rgba(0,0,0,.55);
+    clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);overflow:hidden}
+  th,td{font-family:'Martian Mono',monospace;text-align:center;padding:.42rem .62rem;font-size:1rem}
+  thead th{font-size:.66rem;letter-spacing:.08em;color:var(--faint);text-transform:uppercase;border-bottom:1px solid var(--chalk-line);padding-top:.6rem}
+  .team{text-align:left;padding-left:1rem;padding-right:1.3rem}
+  .team .nm{font-family:'Tanker','Arial Black',sans-serif;letter-spacing:.04em;text-transform:uppercase;font-size:1.15rem;white-space:nowrap}
+  tbody tr+tr td{border-top:1px solid rgba(242,240,233,.07)}
+  tbody tr.accent .team .nm{color:var(--steel-strong)}
+  td.inn{color:var(--chalk);min-width:1.7rem}
+  td.inn.zero{color:var(--faint)}
+  td.rhe{font-weight:700}
+  .rlabel{color:var(--clay-bright)!important} .hlabel{color:var(--steel)!important}
+  col.sep{border-left:2px solid var(--chalk-line)}
+  td.R,th.R{border-left:2px solid var(--chalk-line);color:var(--clay-bright)}
+  td.R{color:var(--chalk);font-size:1.15rem}
+  .batmark{color:var(--clay-bright);font-size:.7rem;visibility:hidden}
+  tr.batting .batmark{visibility:visible}
+</style>
+</head>
+<body>
+  <div id="wrap"><table id="tbl"></table></div>
+
+<script type="module">
+  const q = new URLSearchParams(location.search);
+  const $ = (id) => document.getElementById(id);
+  if (q.has('bg')) document.body.classList.add('bg');
+  if (q.get('pos') === 'bottom') $('wrap').classList.add('bottom');
+  if (q.get('pos') === 'tl') $('wrap').classList.add('tl');
+  const MININN = Math.max(1, parseInt(q.get('innings'), 10) || 6);   // min columns to show
+
+  const esc = (s)=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  function render(s){
+    const aL = Array.isArray(s.away_line) ? s.away_line : [];
+    const hL = Array.isArray(s.home_line) ? s.home_line : [];
+    const n = Math.max(MININN, s.inning || 1, aL.length, hL.length);
+
+    // has any real content? show once the game is underway
+    const started = (s.inning>1) || s.half==='bottom' || (s.away_score||0)>0 || (s.home_score||0)>0 || aL.length || hL.length;
+
+    // cell: run value, or blank if that team hasn't batted in that inning yet
+    const cell = (side, i) => {
+      const arr = side==='away' ? aL : hL;
+      const played = side==='away' ? (i+1 <= s.inning) : (i+1 < s.inning || (i+1===s.inning && s.half==='bottom'));
+      if (!played) return '<td class="inn zero">·</td>';
+      const v = arr[i] || 0;
+      return `<td class="inn${v?'':' zero'}">${v}</td>`;
+    };
+    const rowFor = (side) => {
+      const nm = side==='away' ? s.away_name : s.home_name;
+      const isAccent = s.accent_side===side;
+      const batting = (side==='away' && s.half==='top') || (side==='home' && s.half==='bottom');
+      let cells=''; for(let i=0;i<n;i++) cells += cell(side, i);
+      const R = side==='away' ? (s.away_score||0) : (s.home_score||0);
+      const H = side==='away' ? (s.away_hits||0)  : (s.home_hits||0);
+      const E = side==='away' ? (s.away_errors||0): (s.home_errors||0);
+      return `<tr class="${isAccent?'accent ':''}${batting?'batting':''}">
+        <td class="team"><span class="batmark">◄</span> <span class="nm">${esc(nm)}</span></td>
+        ${cells}
+        <td class="rhe R">${R}</td><td class="rhe">${H}</td><td class="rhe">${E}</td></tr>`;
+    };
+
+    let head='<thead><tr><th class="team"></th>';
+    for(let i=0;i<n;i++) head += `<th>${i+1}</th>`;
+    head += '<th class="R rlabel">R</th><th class="hlabel">H</th><th>E</th></tr></thead>';
+
+    $('tbl').innerHTML = head + '<tbody>' + rowFor('away') + rowFor('home') + '</tbody>';
+    $('wrap').classList.toggle('show', !!started && s.visible !== false);
+  }
+
+  try {
+    const { getScoreboard, onScoreboard } = await import('./scoreboard-shared.js');
+    render(await getScoreboard());
+    onScoreboard(render);
+  } catch (e) { /* hidden if offline */ }
+</script>
+</body>
+</html>

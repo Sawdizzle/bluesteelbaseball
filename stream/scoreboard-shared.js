@@ -30,6 +30,13 @@ export async function setScoreboard(creds, patch) {
   return data;
 }
 
+// Roster (for the control's Now-batting / Steel-of-the-Game pickers).
+export async function getPlayers() {
+  const { data, error } = await sb.from('players').select('*').order('sort_order');
+  if (error) throw error;
+  return data || [];
+}
+
 // Reuse the existing team admin login (same username + PIN as /admin).
 export async function adminLogin(username, pin) {
   const { data, error } = await sb.rpc('admin_login', { p_username: username, p_pin: pin });

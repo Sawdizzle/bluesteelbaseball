@@ -142,6 +142,18 @@
   .fxbtn.clay{background:linear-gradient(180deg,rgba(224,121,74,.2),rgba(224,121,74,.05));border-color:rgba(224,121,74,.5);color:var(--clay-bright)}
   .fxbtn:active{transform:scale(.95)}
   .stylebtn.on{background:linear-gradient(180deg,rgba(127,192,239,.28),rgba(127,192,239,.08));border-color:var(--steel);color:var(--steel-strong)}
+  .he-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
+  .he-team{flex:1;min-width:5rem;font-family:'Tanker','Arial Black',sans-serif;text-transform:uppercase;font-size:.92rem;
+    letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .he-cell{display:inline-flex;align-items:center;gap:.32rem;font-family:'Martian Mono',monospace;font-size:.62rem;color:var(--faint)}
+  .he-cell b{font-family:'Martian Mono',monospace;color:var(--chalk);min-width:1.3ch;text-align:center;font-size:.98rem}
+  .fxbtn.hem{min-height:36px;width:36px;padding:0;font-size:1.05rem}
+  .rosterpick{width:100%;font:inherit;color:var(--chalk);background:rgba(242,240,233,.05);border:1px solid var(--chalk-line);
+    border-radius:8px;padding:.6rem .7rem;margin-bottom:.55rem;-webkit-appearance:none;appearance:none;
+    background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+    background-position:calc(100% - 18px) center,calc(100% - 13px) center;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+  .rosterpick:focus{outline:none;border-color:var(--steel)}
+  .rosterpick option{background:#0e1520;color:var(--chalk)}
   /* editable team-name field in the Teams card */
   .pname-input{width:100%;font-family:'Tanker','Arial Black',sans-serif;text-transform:uppercase;letter-spacing:.04em;
     font-size:.98rem;color:var(--chalk);background:rgba(242,240,233,.05);border:1px solid var(--chalk-line);
@@ -292,6 +304,7 @@
     <!-- now batting -->
     <div class="card">
       <h2>Now batting (lower-third overlay)</h2>
+      <select id="b-pick" class="rosterpick"><option value="">Pick from roster…</option></select>
       <div class="rowline" style="gap:.4rem">
         <input type="text" id="b-num" placeholder="#" maxlength="3" style="max-width:64px;text-align:center;flex:none" />
         <input type="text" id="b-name" placeholder="Batter name" maxlength="24" />
@@ -327,9 +340,26 @@
       <p class="minihint">Every Ball / Strike / Foul and each result adds a pitch automatically. Use ± to correct; <b>New pitcher</b> resets to 0. Show it on the overlay with <code>?pc=1</code>.</p>
     </div>
 
+    <!-- hits & errors (line score) -->
+    <div class="card">
+      <h2>Hits &amp; errors — line score</h2>
+      <div class="he-row">
+        <span class="he-team" id="he-away-lab">Away</span>
+        <span class="he-cell">H<button class="fxbtn hem" data-he="away_hits" data-d="-1">−</button><b id="he-ah">0</b><button class="fxbtn hem" data-he="away_hits" data-d="1">+</button></span>
+        <span class="he-cell">E<button class="fxbtn hem" data-he="away_errors" data-d="-1">−</button><b id="he-ae">0</b><button class="fxbtn hem" data-he="away_errors" data-d="1">+</button></span>
+      </div>
+      <div class="he-row" style="margin-top:.55rem">
+        <span class="he-team" id="he-home-lab">Blue Steel</span>
+        <span class="he-cell">H<button class="fxbtn hem" data-he="home_hits" data-d="-1">−</button><b id="he-hh">0</b><button class="fxbtn hem" data-he="home_hits" data-d="1">+</button></span>
+        <span class="he-cell">E<button class="fxbtn hem" data-he="home_errors" data-d="-1">−</button><b id="he-he">0</b><button class="fxbtn hem" data-he="home_errors" data-d="1">+</button></span>
+      </div>
+      <p class="minihint">Hits add automatically on Single/Double/Triple/HR; errors are manual. Runs per inning fill in as you score — shown on the <b>line score</b> overlay.</p>
+    </div>
+
     <!-- steel of the game -->
     <div class="card">
       <h2>Steel of the Game (full-screen)</h2>
+      <select id="sp-pick" class="rosterpick"><option value="">Pick from roster…</option></select>
       <input type="text" id="sp-name" placeholder="Player name" maxlength="24" style="width:100%" />
       <input type="text" id="sp-line" placeholder="Line — e.g. 3-for-4, HR, 4 RBI" maxlength="46" style="width:100%;margin-top:.5rem" />
       <input type="text" id="sp-label" placeholder="Label (default: Steel of the Game)" maxlength="28" style="width:100%;margin-top:.5rem" />
@@ -395,7 +425,7 @@
 <div class="toast" id="toast"></div>
 
 <script type="module">
-  import { adminLogin, getScoreboard, onScoreboard, setScoreboard } from './scoreboard-shared.js';
+  import { adminLogin, getScoreboard, onScoreboard, setScoreboard, getPlayers } from './scoreboard-shared.js';
 
   const $ = (id) => document.getElementById(id);
   const CREDS_KEY = 'bs_scoreboard_creds';
@@ -406,7 +436,8 @@
   let S = { away_name:'Away', home_name:'Blue Steel', away_score:0, home_score:0,
     inning:1, half:'top', balls:0, strikes:0, outs:0,
     base1:false, base2:false, base3:false, accent_side:'home', status:null, visible:true, style:'classic',
-    batter_num:'', batter_name:'', batter_stat:'', k_count:0, pitch_count:0, spotlight:null };
+    batter_num:'', batter_name:'', batter_stat:'', k_count:0, pitch_count:0, spotlight:null,
+    away_line:[], home_line:[], away_hits:0, home_hits:0, away_errors:0, home_errors:0 };
 
   let toastT;
   function toast(msg, err){ const t=$('toast'); t.textContent=msg; t.className='toast show'+(err?' err':''); clearTimeout(toastT); toastT=setTimeout(()=>t.className='toast',1400); }
@@ -439,6 +470,20 @@
   // ---------- baseball logic ----------
   const battingSide = () => S.half==='top' ? 'away' : 'home';
   const pc = () => (S.pitch_count||0)+1;          // next pitch count — each pitch / result adds one
+  function bumpLine(patch, side, n){              // per-inning runs for the line score
+    const key = side+'_line';
+    const line = Array.isArray(S[key]) ? S[key].slice() : [];
+    const idx = Math.max(0,(S.inning||1)-1);
+    while(line.length <= idx) line.push(0);
+    line[idx] = Math.max(0,(line[idx]||0)+n);
+    patch[key] = line;
+  }
+  function scoreRuns(patch, n){                    // add runs to the batting team (score + line)
+    const side = battingSide();
+    patch[side+'_score'] = Math.max(0,(S[side+'_score']||0)+n);
+    bumpLine(patch, side, n);
+  }
+  function addHit(patch){ const s = battingSide(); patch[s+'_hits'] = (S[s+'_hits']||0)+1; }
   function nextHalf(){
     const patch = { balls:0, strikes:0, outs:0, base1:false, base2:false, base3:false };
     if(S.half==='top') patch.half='bottom';
@@ -458,7 +503,7 @@
   // batter reaches first (walk/HBP): force-advance runners; a run scores only if loaded
   function walkAdvance(){
     const p={}; const side=battingSide();
-    if(S.base1 && S.base2 && S.base3){ p[side+'_score']=Math.max(0,(S[side+'_score']||0)+1); p.base1=p.base2=p.base3=true; }
+    if(S.base1 && S.base2 && S.base3){ p[side+'_score']=Math.max(0,(S[side+'_score']||0)+1); bumpLine(p, side, 1); p.base1=p.base2=p.base3=true; }
     else if(S.base1 && S.base2){ p.base3=true; p.base2=true; p.base1=true; }
     else if(S.base1){ p.base2=true; p.base1=true; }
     else { p.base1=true; }
@@ -471,20 +516,19 @@
   }
 
   // big plays: play the overlay animation + apply scoring / bases / outs (each result is a pitch)
-  const bscore = (p, n) => { const s = battingSide(); p[s+'_score'] = Math.max(0, (S[s+'_score']||0) + n); };
   function playHR(){ const runs = 1 + runnersOn();
     const p = { base1:false, base2:false, base3:false, balls:0, strikes:0, pitch_count:pc(), fx: runnersOn()===3 ? 'grandslam' : 'homerun' };
-    bscore(p, runs); push(p); }
+    scoreRuns(p, runs); addHit(p); push(p); }
   function playTriple(){ const runs = runnersOn();
     const p = { base1:false, base2:false, base3:true, balls:0, strikes:0, pitch_count:pc(), fx:'triple' };
-    if (runs) bscore(p, runs); push(p); }
+    if (runs) scoreRuns(p, runs); addHit(p); push(p); }
   function playDouble(){ const runs = (S.base2?1:0)+(S.base3?1:0);
     const p = { base1:false, base2:true, base3:!!S.base1, balls:0, strikes:0, pitch_count:pc(), fx:'double' };
-    if (runs) bscore(p, runs); push(p); }
+    if (runs) scoreRuns(p, runs); addHit(p); push(p); }
   function playSingle(){ const runs = (S.base3?1:0);
     const p = { base1:true, base2:!!S.base1, base3:!!S.base2, balls:0, strikes:0, pitch_count:pc(), fx:'hit' };
-    if (runs) bscore(p, runs); push(p); }
-  function playRun(){ const p = { fx:'run' }; bscore(p, 1); push(p); }        // run scoring — not a pitch
+    if (runs) scoreRuns(p, runs); addHit(p); push(p); }
+  function playRun(){ const p = { fx:'run' }; scoreRuns(p, 1); push(p); }      // run scoring — not a pitch, not a hit
   function playSteal(){ push({ fx:'steal' }); }                                // steal — not a pitch
   function playWalk(kind){ const p = walkAdvance(); p.balls=0; p.strikes=0; p.pitch_count=pc(); p.fx=kind; push(p); }
   function outWithFx(fx){ const o=(S.outs||0)+1, p=pc();
@@ -565,6 +609,10 @@
     if(document.activeElement!==$('b-stat')) $('b-stat').value = S.batter_stat||'';
     $('k-count').textContent = S.k_count||0;
     $('pc-count').textContent = S.pitch_count||0;
+    // hits & errors + team labels
+    $('he-away-lab').textContent = S.away_name; $('he-home-lab').textContent = S.home_name;
+    $('he-ah').textContent = S.away_hits||0; $('he-ae').textContent = S.away_errors||0;
+    $('he-hh').textContent = S.home_hits||0; $('he-he').textContent = S.home_errors||0;
     const sp = S.spotlight||{};
     if(document.activeElement!==$('sp-name'))  $('sp-name').value  = sp.name||'';
     if(document.activeElement!==$('sp-line'))  $('sp-line').value  = sp.line||'';
@@ -582,7 +630,8 @@
   // ---------- wire controls ----------
   document.querySelectorAll('.pm button').forEach(b=>b.addEventListener('click',()=>{
     const side=b.dataset.side, d=+b.dataset.d;
-    push({ [side+'_score']: Math.max(0,(S[side+'_score']||0)+d) });
+    const patch={}; patch[side+'_score']=Math.max(0,(S[side+'_score']||0)+d); bumpLine(patch, side, d);
+    push(patch);
   }));
   $('q-ball').addEventListener('click', addBall);
   $('q-strike').addEventListener('click', addStrike);
@@ -668,9 +717,28 @@
   $('pc-plus').addEventListener('click',  ()=>push({ pitch_count: (S.pitch_count||0)+1 }));
   $('pc-reset').addEventListener('click', ()=>push({ pitch_count: 0 }));
 
+  // hits & errors
+  document.querySelectorAll('[data-he]').forEach(b=>b.addEventListener('click',()=>{
+    const key=b.dataset.he, d=+b.dataset.d; push({ [key]: Math.max(0,(S[key]||0)+d) });
+  }));
+
   // steel of the game
   $('sp-show').addEventListener('click', ()=>push({ spotlight:{ name:$('sp-name').value.trim(), line:$('sp-line').value.trim(), label:$('sp-label').value.trim()||'Steel of the Game' } }));
   $('sp-hide').addEventListener('click', ()=>push({ spotlight:null }));
+
+  // roster picker — fills the Now-batting / Steel-of-the-Game fields from the players table
+  let PLAYERS = [];
+  function playerStat(p){ const ab=+p.ab||0; if(ab<=0) return '';
+    const a=((+p.h||0)/ab).toFixed(3).replace(/^0/,''); const bits=[a+' AVG'];
+    if(+p.hr) bits.push(p.hr+' HR'); if(+p.rbi) bits.push(p.rbi+' RBI'); return bits.join(' · '); }
+  function fillRoster(){
+    const opts='<option value="">Pick from roster…</option>'+PLAYERS.map((p,i)=>`<option value="${i}">${p.number?('#'+p.number+' '):''}${p.name}</option>`).join('');
+    $('b-pick').innerHTML=opts; $('sp-pick').innerHTML=opts;
+  }
+  $('b-pick').addEventListener('change', e=>{ const p=PLAYERS[e.target.value]; if(!p) return;
+    $('b-num').value=p.number||''; $('b-name').value=p.name||''; $('b-stat').value=playerStat(p); });
+  $('sp-pick').addEventListener('change', e=>{ const p=PLAYERS[e.target.value]; if(!p) return;
+    $('sp-name').value=p.name||''; if(!$('sp-line').value.trim()) $('sp-line').value=playerStat(p); });
 
   // overlay visibility toggle
   $('hidebtn').addEventListener('click', ()=>push({ visible: !S.visible }));
@@ -678,7 +746,9 @@
   $('reset').addEventListener('click', ()=>{
     if(!confirm('Reset the game to 0–0, inning 1?')) return;
     push({ away_score:0, home_score:0, inning:1, half:'top', balls:0, strikes:0, outs:0,
-      base1:false, base2:false, base3:false, status:null });
+      base1:false, base2:false, base3:false, status:null,
+      away_line:[], home_line:[], away_hits:0, home_hits:0, away_errors:0, home_errors:0,
+      k_count:0, pitch_count:0 });
   });
 
   // ---------- boot ----------
@@ -688,6 +758,7 @@
     try { const s=await getScoreboard(); S={...S,...s}; reflect();
       $('conn').classList.add('live'); $('connlabel').textContent='Live';
     } catch(e){ $('connlabel').textContent='Load failed'; toast('Could not load scoreboard', true); }
+    try { PLAYERS = await getPlayers(); fillRoster(); } catch(e){ /* roster optional */ }
     onScoreboard((s)=>{ S={...S,...s}; reflect(); });
   }
 
