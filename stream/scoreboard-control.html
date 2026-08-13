@@ -315,6 +315,18 @@
       <p class="minihint">The <b>K</b> big-play button adds one automatically.</p>
     </div>
 
+    <!-- pitch count -->
+    <div class="card">
+      <h2>Pitch count</h2>
+      <div class="inning-row">
+        <button class="pill" id="pc-minus" style="max-width:64px">−</button>
+        <div class="num" id="pc-count">0</div>
+        <button class="pill" id="pc-plus" style="max-width:64px">＋</button>
+        <button class="pill clay halfbtn" id="pc-reset">New pitcher</button>
+      </div>
+      <p class="minihint">Every Ball / Strike / Foul and each result adds a pitch automatically. Use ± to correct; <b>New pitcher</b> resets to 0. Show it on the overlay with <code>?pc=1</code>.</p>
+    </div>
+
     <!-- steel of the game -->
     <div class="card">
       <h2>Steel of the Game (full-screen)</h2>
@@ -394,7 +406,7 @@
   let S = { away_name:'Away', home_name:'Blue Steel', away_score:0, home_score:0,
     inning:1, half:'top', balls:0, strikes:0, outs:0,
     base1:false, base2:false, base3:false, accent_side:'home', status:null, visible:true, style:'classic',
-    batter_num:'', batter_name:'', batter_stat:'', k_count:0, spotlight:null };
+    batter_num:'', batter_name:'', batter_stat:'', k_count:0, pitch_count:0, spotlight:null };
 
   let toastT;
   function toast(msg, err){ const t=$('toast'); t.textContent=msg; t.className='toast show'+(err?' err':''); clearTimeout(toastT); toastT=setTimeout(()=>t.className='toast',1400); }
@@ -426,6 +438,7 @@
 
   // ---------- baseball logic ----------
   const battingSide = () => S.half==='top' ? 'away' : 'home';
+  const pc = () => (S.pitch_count||0)+1;          // next pitch count — each pitch / result adds one
   function nextHalf(){
     const patch = { balls:0, strikes:0, outs:0, base1:false, base2:false, base3:false };
     if(S.half==='top') patch.half='bottom';
@@ -433,12 +446,14 @@
     return patch;
   }
   function addOut(){
-    const o=(S.outs||0)+1;
-    if(o>=3) push(nextHalf());
-    else push({ outs:o, balls:0, strikes:0 });
+    const o=(S.outs||0)+1, p=pc();
+    if(o>=3){ const q=nextHalf(); q.pitch_count=p; push(q); }
+    else push({ outs:o, balls:0, strikes:0, pitch_count:p });
   }
-  function addStrike(){ const st=(S.strikes||0)+1; if(st>=3) addOut(); else push({ strikes:st }); }
-  function addFoul(){ push({ strikes:Math.min(2,(S.strikes||0)+1) }); }
+  function addStrike(){ const st=(S.strikes||0)+1;
+    if(st>=3) return addOut();                              // 3rd strike → out (counts the pitch)
+    push({ strikes:st, pitch_count:pc() }); }
+  function addFoul(){ push({ strikes:Math.min(2,(S.strikes||0)+1), pitch_count:pc() }); }
   const runnersOn = () => (S.base1?1:0)+(S.base2?1:0)+(S.base3?1:0);
   // batter reaches first (walk/HBP): force-advance runners; a run scores only if loaded
   function walkAdvance(){
@@ -451,36 +466,36 @@
   }
   function addBall(){
     const b=(S.balls||0)+1;
-    if(b<4){ push({ balls:b }); return; }
-    const p=walkAdvance(); p.balls=0; p.strikes=0; push(p);   // 4th ball = walk (no animation)
+    if(b<4){ push({ balls:b, pitch_count:pc() }); return; }
+    const p=walkAdvance(); p.balls=0; p.strikes=0; p.pitch_count=pc(); push(p);   // 4th ball = walk
   }
 
-  // big plays: play the overlay animation + apply scoring / bases / outs
+  // big plays: play the overlay animation + apply scoring / bases / outs (each result is a pitch)
   const bscore = (p, n) => { const s = battingSide(); p[s+'_score'] = Math.max(0, (S[s+'_score']||0) + n); };
   function playHR(){ const runs = 1 + runnersOn();
-    const p = { base1:false, base2:false, base3:false, balls:0, strikes:0, fx: runnersOn()===3 ? 'grandslam' : 'homerun' };
+    const p = { base1:false, base2:false, base3:false, balls:0, strikes:0, pitch_count:pc(), fx: runnersOn()===3 ? 'grandslam' : 'homerun' };
     bscore(p, runs); push(p); }
   function playTriple(){ const runs = runnersOn();
-    const p = { base1:false, base2:false, base3:true, balls:0, strikes:0, fx:'triple' };
+    const p = { base1:false, base2:false, base3:true, balls:0, strikes:0, pitch_count:pc(), fx:'triple' };
     if (runs) bscore(p, runs); push(p); }
   function playDouble(){ const runs = (S.base2?1:0)+(S.base3?1:0);
-    const p = { base1:false, base2:true, base3:!!S.base1, balls:0, strikes:0, fx:'double' };
+    const p = { base1:false, base2:true, base3:!!S.base1, balls:0, strikes:0, pitch_count:pc(), fx:'double' };
     if (runs) bscore(p, runs); push(p); }
   function playSingle(){ const runs = (S.base3?1:0);
-    const p = { base1:true, base2:!!S.base1, base3:!!S.base2, balls:0, strikes:0, fx:'hit' };
+    const p = { base1:true, base2:!!S.base1, base3:!!S.base2, balls:0, strikes:0, pitch_count:pc(), fx:'hit' };
     if (runs) bscore(p, runs); push(p); }
-  function playRun(){ const p = { fx:'run' }; bscore(p, 1); push(p); }
-  function playSteal(){ push({ fx:'steal' }); }              // animation only — set the base by hand
-  function playWalk(kind){ const p = walkAdvance(); p.balls=0; p.strikes=0; p.fx=kind; push(p); }
-  function outWithFx(fx){ const o=(S.outs||0)+1;
-    if (o>=3){ const p=nextHalf(); p.fx=fx; push(p); } else push({ outs:o, balls:0, strikes:0, fx }); }
-  function playStrikeout(){ const o=(S.outs||0)+1, k=(S.k_count||0)+1;
-    if (o>=3){ const p=nextHalf(); p.fx='strikeout'; p.k_count=k; push(p); }
-    else push({ outs:o, balls:0, strikes:0, fx:'strikeout', k_count:k }); }
+  function playRun(){ const p = { fx:'run' }; bscore(p, 1); push(p); }        // run scoring — not a pitch
+  function playSteal(){ push({ fx:'steal' }); }                                // steal — not a pitch
+  function playWalk(kind){ const p = walkAdvance(); p.balls=0; p.strikes=0; p.pitch_count=pc(); p.fx=kind; push(p); }
+  function outWithFx(fx){ const o=(S.outs||0)+1, p=pc();
+    if (o>=3){ const q=nextHalf(); q.pitch_count=p; q.fx=fx; push(q); } else push({ outs:o, balls:0, strikes:0, pitch_count:p, fx }); }
+  function playStrikeout(){ const o=(S.outs||0)+1, k=(S.k_count||0)+1, p=pc();
+    if (o>=3){ const q=nextHalf(); q.fx='strikeout'; q.k_count=k; q.pitch_count=p; push(q); }
+    else push({ outs:o, balls:0, strikes:0, fx:'strikeout', k_count:k, pitch_count:p }); }
   function playOut(){ outWithFx('out'); }
-  function playDP(){ const o=(S.outs||0)+2;
-    if (o>=3){ const p=nextHalf(); p.fx='doubleplay'; push(p); }
-    else push({ outs:o, base1:false, balls:0, strikes:0, fx:'doubleplay' }); }
+  function playDP(){ const o=(S.outs||0)+2, p=pc();
+    if (o>=3){ const q=nextHalf(); q.fx='doubleplay'; q.pitch_count=p; push(q); }
+    else push({ outs:o, base1:false, balls:0, strikes:0, fx:'doubleplay', pitch_count:p }); }
 
   // shrink an uploaded photo to a small square-ish logo data URI
   function resizeImage(file, max=160){
@@ -549,6 +564,7 @@
     if(document.activeElement!==$('b-name')) $('b-name').value = S.batter_name||'';
     if(document.activeElement!==$('b-stat')) $('b-stat').value = S.batter_stat||'';
     $('k-count').textContent = S.k_count||0;
+    $('pc-count').textContent = S.pitch_count||0;
     const sp = S.spotlight||{};
     if(document.activeElement!==$('sp-name'))  $('sp-name').value  = sp.name||'';
     if(document.activeElement!==$('sp-line'))  $('sp-line').value  = sp.line||'';
@@ -646,6 +662,11 @@
   $('k-minus').addEventListener('click', ()=>push({ k_count: Math.max(0,(S.k_count||0)-1) }));
   $('k-plus').addEventListener('click',  ()=>push({ k_count: (S.k_count||0)+1 }));
   $('k-reset').addEventListener('click', ()=>push({ k_count: 0 }));
+
+  // pitch count
+  $('pc-minus').addEventListener('click', ()=>push({ pitch_count: Math.max(0,(S.pitch_count||0)-1) }));
+  $('pc-plus').addEventListener('click',  ()=>push({ pitch_count: (S.pitch_count||0)+1 }));
+  $('pc-reset').addEventListener('click', ()=>push({ pitch_count: 0 }));
 
   // steel of the game
   $('sp-show').addEventListener('click', ()=>push({ spotlight:{ name:$('sp-name').value.trim(), line:$('sp-line').value.trim(), label:$('sp-label').value.trim()||'Steel of the Game' } }));

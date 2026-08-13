@@ -100,6 +100,8 @@
   .pip{width:9px;height:9px;border-radius:50%;background:rgba(242,240,233,.13);border:1px solid var(--chalk-line);transition:all .18s ease}
   .pip.on.ball{background:var(--steel);border-color:var(--steel);box-shadow:0 0 8px rgba(127,192,239,.7)}
   .pip.on.strike{background:var(--clay-bright);border-color:var(--clay-bright);box-shadow:0 0 8px rgba(224,121,74,.7)}
+  .pc-row{display:none} #bug.show-pc .pc-row{display:flex}
+  .pcnum{font-family:'Martian Mono',monospace;font-weight:700;font-size:.82rem;color:var(--chalk)}
 
   /* value pop on change */
   .flash{animation:flash .5s ease}
@@ -154,6 +156,36 @@
     13%{opacity:1;transform:translate(-50%,0) scale(1)}
     82%{opacity:1;transform:translate(-50%,0) scale(1)}
     100%{opacity:0;transform:translate(-50%,-12px) scale(1)}}
+
+  /* ---- per-style big-play theming (FX layer tagged with current style) ---- */
+  #fx[data-style="jumbotron"] .fx-big .lead{background:linear-gradient(180deg,#ffe08a,#ffb028 55%,#ff7a00);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    filter:drop-shadow(0 0 18px rgba(255,176,40,.6)) drop-shadow(0 2px 2px rgba(0,0,0,.4))}
+  #fx[data-style="jumbotron"] .fx-tag,#fx[data-style="jumbotron"] .fx-tag.steel{background:linear-gradient(180deg,#ffd888,#ffb028);color:#241400}
+
+  #fx[data-style="neon"] .fx-big .lead{filter:drop-shadow(0 0 22px rgba(127,192,239,.85)) drop-shadow(0 0 40px rgba(224,121,74,.5))}
+  #fx[data-style="neon"] .fx-tag{box-shadow:0 0 24px rgba(224,121,74,.6),0 14px 40px rgba(0,0,0,.5)}
+  #fx[data-style="neon"] .fx-tag.steel{box-shadow:0 0 24px rgba(127,192,239,.75),0 14px 40px rgba(0,0,0,.5)}
+
+  #fx[data-style="synthwave"] .fx-big .lead{background:linear-gradient(180deg,#ff4fa3,#c56bff 50%,#00e5ff);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    filter:drop-shadow(0 0 22px rgba(255,79,163,.6)) drop-shadow(0 0 30px rgba(0,229,255,.4))}
+  #fx[data-style="synthwave"] .fx-tag{background:linear-gradient(180deg,#ff4fa3,#c556c9);color:#fff}
+  #fx[data-style="synthwave"] .fx-tag.steel{background:linear-gradient(180deg,#00e5ff,#3aa7ff);color:#04222b}
+
+  #fx[data-style="terminal"] .fx-big .lead{font-family:'Martian Mono',monospace;background:none;
+    -webkit-text-fill-color:#23ff6e;color:#23ff6e;filter:drop-shadow(0 0 16px rgba(35,255,110,.85));letter-spacing:.02em}
+  #fx[data-style="terminal"] .fx-big .sub{color:#7dffb0}
+  #fx[data-style="terminal"] .fx-tag,#fx[data-style="terminal"] .fx-tag.steel{background:linear-gradient(180deg,#2bff77,#12b053);color:#03230f}
+
+  #fx[data-style="chalk"] .fx-big .lead{background:none;-webkit-text-fill-color:#f4f2ea;color:#f4f2ea;filter:drop-shadow(0 2px 1px rgba(0,0,0,.5))}
+  #fx[data-style="chalk"] .fx-tag,#fx[data-style="chalk"] .fx-tag.steel{background:#f4f2ea;color:#153029}
+
+  #fx[data-style="bubblegum"] .fx-big .lead{background:linear-gradient(180deg,#ff7ac6,#ffd93b 60%,#8ff0ff);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    filter:drop-shadow(0 0 18px rgba(255,122,198,.6))}
+  #fx[data-style="bubblegum"] .fx-tag{background:linear-gradient(180deg,#ff7ac6,#ff4fa3);color:#fff}
+  #fx[data-style="bubblegum"] .fx-tag.steel{background:linear-gradient(180deg,#8ff0ff,#3ad0ff);color:#062633}
 
   /* ============================================================
      SCOREBOARD STYLES — set via [data-style] on #anchor
@@ -336,6 +368,7 @@
       <div class="count">
         <div class="crow"><span class="clabel">B</span><span class="pips" id="balls"></span></div>
         <div class="crow"><span class="clabel">S</span><span class="pips" id="strikes"></span></div>
+        <div class="crow pc-row"><span class="clabel">PC</span><span class="pcnum" id="pcnum">0</span></div>
       </div>
       <div class="banner" id="banner"></div>
     </div>
@@ -354,6 +387,7 @@
   const STYLES = ['classic','minimal','chalk','neon','jumbotron','synthwave','broadcast','terminal','bubblegum'];
   const forcedStyle = STYLES.includes(q.get('style')) ? q.get('style') : null;
   anchor.dataset.style = forcedStyle || 'classic';
+  const SHOW_PC = q.has('pc');   // show pitch count on the bug
 
   const $ = (id) => document.getElementById(id);
   const bug = $('bug');
@@ -448,16 +482,26 @@
 
   // ---- big-play visuals ----
   const CONFETTI = ['#7fc0ef','#a9d8fa','#e0794a','#f2f0e9'];
+  const CONFETTI_BY_STYLE = {
+    jumbotron:['#ffb028','#ffd888','#79f56a','#ff5a3c'],
+    neon:['#7fc0ef','#a9d8fa','#e0794a','#ffffff'],
+    synthwave:['#ff4fa3','#00e5ff','#c2f7ff','#ffd93b'],
+    terminal:['#23ff6e','#7dffb0','#0aff9d','#eafff2'],
+    chalk:['#f4f2ea','#c9d6e6','#a9d8fa','#ffffff'],
+    bubblegum:['#ff7ac6','#8ff0ff','#ffd93b','#ffffff'],
+  };
+  const curStyle = () => anchor.dataset.style || 'classic';
   function bigPlay(lead, opts = {}){
     const { confetti = true, scheme = '', sub = 'Blue Steel Baseball' } = opts;
-    FX.innerHTML = '';
+    FX.innerHTML = ''; FX.dataset.style = curStyle();
+    const palette = CONFETTI_BY_STYLE[curStyle()] || CONFETTI;
     const b = document.createElement('div'); b.className = 'fx-big' + (scheme ? ' ' + scheme : '');
     b.innerHTML = `<div class="lead">${lead}</div>` + (sub ? `<div class="sub">${sub}</div>` : '');
     FX.appendChild(b); void b.offsetWidth; b.classList.add('show');
     if (confetti) for (let i = 0; i < 44; i++){
       const c = document.createElement('div'); c.className = 'confetti';
       c.style.left = (Math.random()*100) + 'vw';
-      c.style.background = CONFETTI[i % CONFETTI.length];
+      c.style.background = palette[i % palette.length];
       c.style.animation = `fall ${(2.6 + Math.random()*1.7).toFixed(2)}s linear ${(Math.random()*0.5).toFixed(2)}s forwards`;
       c.style.transform = `rotate(${Math.floor(Math.random()*180)}deg)`;
       FX.appendChild(c);
@@ -465,7 +509,7 @@
     clearTimeout(FX._t); FX._t = setTimeout(() => { FX.innerHTML = ''; }, 3700);
   }
   function tagPlay(text, variant = ''){
-    FX.innerHTML = '';
+    FX.innerHTML = ''; FX.dataset.style = curStyle();
     const t = document.createElement('div'); t.className = 'fx-tag' + (variant ? ' ' + variant : '');
     t.textContent = text; FX.appendChild(t); void t.offsetWidth; t.classList.add('show');
     clearTimeout(FX._t); FX._t = setTimeout(() => { FX.innerHTML = ''; }, 2400);
@@ -548,6 +592,10 @@
     buildPips($('strikes'), 2, 'strike');
     [...$('balls').children].forEach((p, i) => p.classList.toggle('on', i < s.balls));
     [...$('strikes').children].forEach((p, i) => p.classList.toggle('on', i < s.strikes));
+
+    // pitch count (opt-in via ?pc=1)
+    $('pcnum').textContent = s.pitch_count || 0;
+    bug.classList.toggle('show-pc', SHOW_PC && (s.pitch_count||0) > 0);
 
     // status banner
     if (s.status) { $('banner').textContent = s.status; bug.classList.add('has-status'); }
