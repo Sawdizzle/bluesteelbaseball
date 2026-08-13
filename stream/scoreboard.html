@@ -233,6 +233,60 @@
   #anchor[data-style="jumbotron"] #bug::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
     background:repeating-linear-gradient(rgba(0,0,0,0) 0 2px, rgba(0,0,0,.16) 2px 3px);animation:jumboFlicker 5s steps(40) infinite}
   @keyframes jumboFlicker{0%,100%{opacity:.55}45%{opacity:.72}55%{opacity:.5}92%{opacity:.68}96%{opacity:.42}}
+
+  /* ---- SYNTHWAVE: 80s sunset, magenta/cyan, perspective grid ---- */
+  #anchor[data-style="synthwave"] #bug{background:linear-gradient(180deg,#2a0a4a,#0f0524);border:1.5px solid #ff4fa3;
+    clip-path:none;border-radius:10px;position:relative;overflow:hidden;animation:swGlow 3s ease-in-out infinite}
+  @keyframes swGlow{
+    0%,100%{box-shadow:0 0 22px rgba(255,79,163,.5),0 0 55px rgba(0,229,255,.22),inset 0 0 18px rgba(0,229,255,.1)}
+    50%{box-shadow:0 0 34px rgba(0,229,255,.5),0 0 80px rgba(255,79,163,.35),inset 0 0 24px rgba(255,79,163,.16)}}
+  #anchor[data-style="synthwave"] #bug::before{content:"";position:absolute;left:0;right:0;bottom:0;height:48%;pointer-events:none;
+    background:repeating-linear-gradient(90deg, rgba(0,229,255,.4) 0 1px, transparent 1px 26px),
+      linear-gradient(transparent, rgba(255,79,163,.14));
+    transform:perspective(120px) rotateX(56deg);transform-origin:bottom;opacity:.55}
+  #anchor[data-style="synthwave"] .tname{color:#fff;text-shadow:0 0 8px #ff4fa3,0 0 16px #ff4fa3}
+  #anchor[data-style="synthwave"] .team.accent .tname{color:#c2f7ff;text-shadow:0 0 10px #00e5ff,0 0 20px #00e5ff}
+  #anchor[data-style="synthwave"] .tscore{background:rgba(0,0,0,.35);border:1px solid #ff4fa3;color:#fff;text-shadow:0 0 10px #ff4fa3}
+  #anchor[data-style="synthwave"] .inning .num{color:#00e5ff;text-shadow:0 0 10px #00e5ff}
+  #anchor[data-style="synthwave"] .inning .arw{color:#ff4fa3;text-shadow:0 0 8px #ff4fa3}
+  #anchor[data-style="synthwave"] .base.on{background:linear-gradient(135deg,#ff4fa3,#00e5ff);border-color:#ff4fa3;box-shadow:0 0 16px #ff4fa3}
+  #anchor[data-style="synthwave"] .odot.on{background:#ff4fa3;border-color:#ff4fa3;box-shadow:0 0 12px #ff4fa3}
+  #anchor[data-style="synthwave"] .pip.on.ball{background:#00e5ff!important;border-color:#00e5ff!important;box-shadow:0 0 10px #00e5ff!important}
+  #anchor[data-style="synthwave"] .pip.on.strike{background:#ff4fa3!important;border-color:#ff4fa3!important;box-shadow:0 0 10px #ff4fa3!important}
+
+  /* ---- BROADCAST: clean pro look, team-color bars ---- */
+  #anchor[data-style="broadcast"] #bug{background:linear-gradient(180deg,#0e1626,#0a1018);border:none;clip-path:none;
+    border-radius:6px;overflow:hidden;box-shadow:0 12px 34px rgba(0,0,0,.55)}
+  #anchor[data-style="broadcast"] .team{padding-left:1.05rem}
+  #anchor[data-style="broadcast"] .team.away{box-shadow:inset 6px 0 0 var(--clay)}
+  #anchor[data-style="broadcast"] .team.home{box-shadow:inset 6px 0 0 var(--steel)}
+  #anchor[data-style="broadcast"] .team .bat{display:none}
+  #anchor[data-style="broadcast"] .team.batting{background:linear-gradient(90deg,rgba(242,240,233,.08),transparent)}
+  #anchor[data-style="broadcast"] .tscore{background:rgba(0,0,0,.32);border:none;color:#fff;font-size:1.85rem}
+  #anchor[data-style="broadcast"] .team.home .tscore{color:var(--steel-strong)}
+  #anchor[data-style="broadcast"] .sep{opacity:.25}
+
+  /* ---- TERMINAL: green matrix monospace ---- */
+  #anchor[data-style="terminal"] #bug{background:rgba(0,10,3,.92);border:1px solid #1f7a3d;clip-path:none;border-radius:4px;
+    position:relative;overflow:hidden;box-shadow:0 0 18px rgba(35,255,110,.25),inset 0 0 20px rgba(0,0,0,.6)}
+  #anchor[data-style="terminal"] .tname,#anchor[data-style="terminal"] .tscore,
+  #anchor[data-style="terminal"] .inning .num,#anchor[data-style="terminal"] .clabel{
+    font-family:'Martian Mono',monospace!important;color:#23ff6e;text-shadow:0 0 6px rgba(35,255,110,.7)}
+  #anchor[data-style="terminal"] .tname{font-size:1.05rem;letter-spacing:.02em;max-width:168px}
+  #anchor[data-style="terminal"] .teams{min-width:250px}
+  #anchor[data-style="terminal"] .team.accent .tname{color:#7dffb0}
+  #anchor[data-style="terminal"] .tscore{background:transparent;border:1px solid rgba(35,255,110,.4)}
+  #anchor[data-style="terminal"] .inning .arw{color:#23ff6e;text-shadow:0 0 6px rgba(35,255,110,.7)}
+  #anchor[data-style="terminal"] .sep{background:rgba(35,255,110,.25)}
+  #anchor[data-style="terminal"] .chip{border:1px solid rgba(35,255,110,.4);background:transparent}
+  #anchor[data-style="terminal"] .base{border-color:rgba(35,255,110,.45);background:transparent}
+  #anchor[data-style="terminal"] .base.on{background:#23ff6e;border-color:#23ff6e;box-shadow:0 0 12px #23ff6e}
+  #anchor[data-style="terminal"] .odot{border-color:rgba(35,255,110,.45)}
+  #anchor[data-style="terminal"] .odot.on{background:#23ff6e;border-color:#23ff6e;box-shadow:0 0 10px #23ff6e}
+  #anchor[data-style="terminal"] .pip{border-color:rgba(35,255,110,.45)}
+  #anchor[data-style="terminal"] .pip.on{background:#23ff6e!important;border-color:#23ff6e!important;box-shadow:0 0 8px #23ff6e!important}
+  #anchor[data-style="terminal"] #bug::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(rgba(0,0,0,0) 0 2px, rgba(0,0,0,.14) 2px 3px);animation:jumboFlicker 5s steps(40) infinite}
 </style>
 </head>
 <body>
@@ -281,7 +335,7 @@
   if (q.has('bg')) document.body.classList.add('bg');
   const scale = parseFloat(q.get('scale'));
   if (scale > 0) anchor.style.transform = `scale(${scale})`;
-  const STYLES = ['classic','minimal','chalk','neon','jumbotron'];
+  const STYLES = ['classic','minimal','chalk','neon','jumbotron','synthwave','broadcast','terminal'];
   const forcedStyle = STYLES.includes(q.get('style')) ? q.get('style') : null;
   anchor.dataset.style = forcedStyle || 'classic';
 
