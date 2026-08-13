@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blue Steel — Final Score</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://api.fontshare.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=supreme@400,500,700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --field:#0a0e16; --field-deep:#060910; --dugout:#121a29;
+    --chalk:#f2f0e9; --muted:#93a3b8; --faint:#5f7086;
+    --steel:#7fc0ef; --steel-strong:#a9d8fa; --clay:#c4653b; --clay-bright:#e0794a;
+    --win:#8fe3b0; --loss:#ef9c8b; --chalk-line:rgba(242,240,233,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;color:var(--chalk);font-family:'Supreme','Helvetica Neue',Arial,sans-serif}
+  body{background:
+    radial-gradient(80rem 40rem at 82% -14%, rgba(127,192,239,.10), transparent 60%),
+    radial-gradient(60rem 40rem at 12% 120%, rgba(196,101,59,.08), transparent 60%),
+    linear-gradient(180deg,var(--field-deep) 0%, var(--field) 40%, #0b1220 100%)}
+  #sweep{position:fixed;inset:-20%;background:conic-gradient(from 210deg at 78% -10%, transparent 0deg, rgba(169,216,250,.10) 22deg, transparent 46deg);
+    animation:sweep 16s linear infinite;pointer-events:none;mix-blend-mode:screen}
+  @keyframes sweep{to{transform:rotate(360deg)}}
+  #diamond{position:fixed;left:50%;bottom:-26vh;width:150vh;height:150vh;transform:translateX(-50%) rotate(45deg);
+    border:2px solid rgba(242,240,233,.06);opacity:.5;pointer-events:none}
+
+  main{position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.6vh;z-index:2;text-align:center;padding:5vh 5vw}
+  .eyebrow{font-family:'Martian Mono',monospace;letter-spacing:.5em;font-size:clamp(.7rem,1.6vw,1.05rem);
+    color:var(--steel);text-transform:uppercase;animation:in 800ms ease both}
+  .headline{font-family:'Tanker','Arial Black',sans-serif;text-transform:uppercase;letter-spacing:.06em;line-height:.9;
+    font-size:clamp(2.8rem,8.5vw,7.4rem);
+    background:linear-gradient(180deg,var(--chalk),#c9d6e6);-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:in 900ms ease 120ms both}
+  .headline.win{background:linear-gradient(180deg,#c7f6db,var(--win) 55%,var(--steel));-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 8px 26px rgba(143,227,176,.4))}
+
+  .lines{display:flex;flex-direction:column;gap:.5rem;margin-top:.6vh;min-width:min(560px,86vw);animation:in 900ms ease 260ms both}
+  .teamrow{display:flex;align-items:center;justify-content:space-between;gap:1.4rem;
+    padding:.7rem 1.3rem;background:rgba(18,26,41,.6);border:1px solid var(--chalk-line);
+    clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+  .teamrow.winner{border-color:rgba(127,192,239,.55);background:rgba(127,192,239,.1)}
+  .teamrow .nm{font-family:'Tanker','Arial Black',sans-serif;letter-spacing:.04em;text-transform:uppercase;
+    font-size:clamp(1.2rem,3vw,2.1rem);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .teamrow.winner .nm{color:var(--steel-strong)}
+  .teamrow .sc{font-family:'Martian Mono',monospace;font-weight:700;font-size:clamp(1.6rem,4vw,2.8rem);min-width:2ch;text-align:right}
+  .teamrow .tag{font-family:'Martian Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--win);border:1px solid rgba(143,227,176,.4);border-radius:4px;padding:.15rem .4rem;visibility:hidden}
+  .teamrow.winner .tag{visibility:visible}
+
+  .brand{font-family:'Martian Mono',monospace;font-size:clamp(.6rem,1.1vw,.78rem);letter-spacing:.4em;
+    color:var(--faint);text-transform:uppercase;margin-top:1vh;animation:in 900ms ease 420ms both}
+  @keyframes in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+  .rail{position:fixed;left:0;bottom:0;width:100%;height:4px;background:rgba(242,240,233,.06)}
+  .rail i{display:block;height:100%;width:34%;background:linear-gradient(90deg,transparent,var(--clay-bright),var(--steel),transparent);animation:rail 3.4s ease-in-out infinite}
+  @keyframes rail{0%{transform:translateX(-40%)}100%{transform:translateX(320%)}}
+
+  #fx{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:3}
+  .confetti{position:absolute;top:-8vh;width:11px;height:15px;border-radius:2px}
+  @keyframes fall{0%{transform:translateY(-10vh) rotate(0);opacity:0}8%{opacity:1}100%{transform:translateY(114vh) rotate(760deg);opacity:.9}}
+</style>
+</head>
+<body>
+  <div id="sweep"></div>
+  <div id="diamond"></div>
+  <main>
+    <div class="eyebrow" id="eyebrow">Final</div>
+    <div class="headline" id="headline">Final</div>
+    <div class="lines">
+      <div class="teamrow" id="row-away"><span class="nm" id="away-name">Away</span><span class="tag">Win</span><span class="sc" id="away-score">0</span></div>
+      <div class="teamrow" id="row-home"><span class="nm" id="home-name">Blue Steel</span><span class="tag">Win</span><span class="sc" id="home-score">0</span></div>
+    </div>
+    <div class="brand">Blue Steel Baseball</div>
+  </main>
+  <div class="rail"><i></i></div>
+  <div id="fx"></div>
+
+<script type="module">
+  const q = new URLSearchParams(location.search);
+  const $ = (id) => document.getElementById(id);
+  const CONF = ['#7fc0ef','#a9d8fa','#e0794a','#f2f0e9','#8fe3b0'];
+  let celebrated = false;
+
+  function confetti(){
+    const fx = $('fx');
+    for (let i=0;i<60;i++){
+      const c=document.createElement('div'); c.className='confetti';
+      c.style.left=(Math.random()*100)+'vw'; c.style.background=CONF[i%CONF.length];
+      c.style.animation=`fall ${(2.8+Math.random()*2).toFixed(2)}s linear ${(Math.random()*0.8).toFixed(2)}s forwards`;
+      c.style.transform=`rotate(${Math.floor(Math.random()*180)}deg)`;
+      fx.appendChild(c);
+    }
+    setTimeout(()=>{ fx.innerHTML=''; }, 5200);
+  }
+
+  function render(s){
+    $('away-name').textContent = s.away_name;
+    $('home-name').textContent = s.home_name;
+    $('away-score').textContent = s.away_score;
+    $('home-score').textContent = s.home_score;
+    const homeWins = s.home_score > s.away_score;
+    const awayWins = s.away_score > s.home_score;
+    $('row-home').classList.toggle('winner', homeWins);
+    $('row-away').classList.toggle('winner', awayWins);
+
+    // Is "our" side (accent) the winner?
+    const ourWin = (s.accent_side === 'home' && homeWins) || (s.accent_side === 'away' && awayWins);
+    const winnerName = homeWins ? s.home_name : awayWins ? s.away_name : null;
+    if (ourWin) { $('headline').textContent = `${winnerName} Win!`; $('headline').classList.add('win'); }
+    else if (winnerName) { $('headline').textContent = `${winnerName} Win`; $('headline').classList.remove('win'); }
+    else { $('headline').textContent = 'Final — Tie'; $('headline').classList.remove('win'); }
+
+    if (ourWin && !celebrated) { celebrated = true; confetti(); }
+    if (!ourWin) celebrated = false;
+  }
+
+  try {
+    const { getScoreboard, onScoreboard } = await import('./scoreboard-shared.js');
+    render(await getScoreboard());
+    onScoreboard(render);
+  } catch (e) {
+    $('headline').textContent = 'Final';   // offline fallback
+  }
+</script>
+</body>
+</html>

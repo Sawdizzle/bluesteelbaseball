@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blue Steel — Ticker</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://api.fontshare.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=supreme@400,500,700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --field-deep:#060910; --dugout:#121a29; --chalk:#f2f0e9; --faint:#5f7086;
+    --steel:#7fc0ef; --steel-strong:#a9d8fa; --clay:#c4653b; --clay-bright:#e0794a; --chalk-line:rgba(242,240,233,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:transparent;font-family:'Supreme','Helvetica Neue',Arial,sans-serif}
+  body.bg{background:linear-gradient(120deg,#20303f,#0a121e)}   /* ?bg=1 preview */
+
+  .bar{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:stretch;
+    background:linear-gradient(180deg,rgba(10,14,22,.94),rgba(6,9,16,.96));
+    border-top:1px solid var(--chalk-line);box-shadow:0 -10px 30px rgba(0,0,0,.4)}
+  .bar.top{bottom:auto;top:0;border-top:none;border-bottom:1px solid var(--chalk-line);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+
+  .label{flex:none;display:flex;align-items:center;gap:.5rem;padding:0 1.2rem;
+    background:linear-gradient(180deg,var(--clay-bright),var(--clay));color:#170b06;
+    font-family:'Tanker','Arial Black',sans-serif;letter-spacing:.08em;text-transform:uppercase;font-size:1.02rem;
+    clip-path:polygon(0 0,100% 0,calc(100% - 14px) 100%,0 100%)}
+  .label .dot{width:9px;height:9px;border-radius:50%;background:#170b06;animation:blink 1.4s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+  .track-wrap{flex:1;overflow:hidden;display:flex;align-items:center;position:relative}
+  .track{display:inline-flex;align-items:center;white-space:nowrap;will-change:transform;animation:marquee linear infinite}
+  .track .item{display:inline-flex;align-items:center;color:var(--chalk);font-size:1.05rem;letter-spacing:.02em;padding:0 1.4rem}
+  .track .sep{color:var(--clay-bright);font-size:.7rem}
+  @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+  <div class="bar" id="bar">
+    <div class="label"><span class="dot"></span><span id="labeltext">Blue Steel</span></div>
+    <div class="track-wrap"><div class="track" id="track"></div></div>
+  </div>
+
+<script>
+  const q = new URLSearchParams(location.search);
+  if (q.has('bg')) document.body.classList.add('bg');
+  if (q.get('pos') === 'top') document.getElementById('bar').classList.add('top');
+  if (q.get('label')) document.getElementById('labeltext').textContent = q.get('label');
+
+  const DEFAULT = ['Go Blue Steel!', 'Thanks to our sponsors', 'Follow @bluesteelbaseballtx',
+    'Catch every game live', "Let's Go Blue Steel!"];
+  // items separated by | (pipe). e.g. ?items=Joe%27s Pizza|Smith Auto|Next game Sat 10a
+  const items = (q.get('items') ? q.get('items').split('|') : DEFAULT).map(s => s.trim()).filter(Boolean);
+
+  const track = document.getElementById('track');
+  function buildHalf(){
+    const frag = document.createDocumentFragment();
+    items.forEach((txt) => {
+      const it = document.createElement('span'); it.className = 'item'; it.textContent = txt;
+      const sp = document.createElement('span'); sp.className = 'sep'; sp.textContent = '◆';
+      frag.appendChild(it); frag.appendChild(sp);
+    });
+    return frag;
+  }
+  // two identical halves so translateX(-50%) loops seamlessly
+  track.appendChild(buildHalf());
+  track.appendChild(buildHalf());
+
+  // pace it by content width (≈ 90px/sec, override with ?speed=)
+  requestAnimationFrame(() => {
+    const half = track.scrollWidth / 2;
+    const pxPerSec = parseFloat(q.get('speed')) || 90;
+    track.style.animationDuration = Math.max(12, half / pxPerSec) + 's';
+  });
+</script>
+</body>
+</html>

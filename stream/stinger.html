@@ -16,8 +16,9 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:100%;height:100%;overflow:hidden;background:transparent}
-  /* OBS: leave background transparent. For a quick dark preview add ?bg=1 */
+  /* OBS: leave background transparent. ?bg=1 = dark preview. ?black=1 = solid black (for recording a Stinger video). */
   body.bg{background:var(--field-deep)}
+  body.black{background:#000}
 
   #stage{position:fixed;inset:0}
 
@@ -107,6 +108,7 @@
   // ?bg=1 -> dark preview background. ?loop=1 -> replay on a loop for previewing.
   const q = new URLSearchParams(location.search);
   if(q.has('bg')) document.body.classList.add('bg');
+  if(q.has('black')) document.body.classList.add('black');
 
   const stage = document.getElementById('stage');
   function play(){

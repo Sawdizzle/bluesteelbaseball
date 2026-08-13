@@ -408,6 +408,24 @@
       case 'steal':  noise(t,0.35,{peak:0.22,freq:400,slideTo:3200}); break;   // whoosh
       case 'out':    beep(140,t,0.24,{peak:0.32}); break;                       // thud
       case 'doubleplay': beep(150,t,0.16,{peak:0.3}); beep(115,t+0.18,0.24,{peak:0.3}); break;
+      // ---- soundboard (crowd) ----
+      case 'charge':
+        [523.25,523.25,659.25,783.99,1046.5].forEach((f,i)=>beep(f,t+i*0.13,0.16,{type:'square',peak:0.24}));
+        beep(1046.5,t+0.66,0.42,{type:'square',peak:0.22}); break;   // bugle "CHARGE!"
+      case 'airhorn':
+        [[0,0.18],[0.26,0.18],[0.52,0.6]].forEach(([o,d])=>{
+          beep(220,t+o,d,{type:'sawtooth',peak:0.28}); beep(330,t+o,d,{type:'sawtooth',peak:0.17});
+          noise(t+o,d,{peak:0.08,freq:1200}); }); break;
+      case 'rally': {                                              // stomp-stomp-clap x2
+        const stomp=(o)=>{ beep(70,t+o,0.16,{type:'sine',peak:0.4}); noise(t+o,0.08,{peak:0.12,freq:200}); };
+        const clap=(o)=>noise(t+o,0.05,{peak:0.42,freq:2200,q:1.2});
+        stomp(0); stomp(0.28); clap(0.56); stomp(0.9); stomp(1.18); clap(1.46); break; }
+      case 'bell':
+        beep(880,t,0.6,{type:'sine',peak:0.3}); beep(1320,t,0.5,{type:'sine',peak:0.12}); beep(1760,t,0.4,{type:'sine',peak:0.07}); break;
+      case 'boo':
+        beep(300,t,0.7,{type:'sawtooth',peak:0.24,slideTo:110}); noise(t,0.5,{peak:0.08,freq:500,slideTo:200}); break;
+      case 'whistle':
+        beep(2100,t,0.5,{type:'sine',peak:0.2}); beep(2100,t+0.05,0.4,{type:'sine',peak:0.15,slideTo:2600}); break;
       default:       beep(660,t,0.15,{peak:0.2});
     }
   }
@@ -450,9 +468,14 @@
     out:      () => tagPlay('Out', 'gray'),
     doubleplay:() => tagPlay('Double Play', 'gray'),
   };
+  const SOUND_ONLY = { airhorn:1, bell:1, boo:1, whistle:1 };  // soundboard: audio, no visual
+  const SOUND_TAG  = { charge:'Charge!', rally:'Rally!' };     // soundboard: small tag + audio
   function playFx(kind){
     sfx(kind);
-    (FX_MAP[kind] || (() => tagPlay(String(kind).toUpperCase(), '')))();
+    if (FX_MAP[kind]) return FX_MAP[kind]();
+    if (SOUND_TAG[kind]) return tagPlay(SOUND_TAG[kind], '');
+    if (SOUND_ONLY[kind]) return;
+    tagPlay(String(kind).toUpperCase(), '');
   }
 
   const setText = (el, val, animate) => {

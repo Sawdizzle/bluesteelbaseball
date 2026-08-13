@@ -275,6 +275,19 @@
       </div>
     </div>
 
+    <!-- soundboard -->
+    <div class="card">
+      <h2>Soundboard — plays through the overlay</h2>
+      <div class="fxmini" style="grid-template-columns:repeat(3,1fr)">
+        <button class="fxbtn" data-sfx="charge">Charge!</button>
+        <button class="fxbtn" data-sfx="airhorn">Air Horn</button>
+        <button class="fxbtn" data-sfx="rally">Rally</button>
+        <button class="fxbtn" data-sfx="bell">Bell</button>
+        <button class="fxbtn" data-sfx="whistle">Whistle</button>
+        <button class="fxbtn" data-sfx="boo">Boo</button>
+      </div>
+    </div>
+
     <!-- banner -->
     <div class="card">
       <h2>Banner</h2>
@@ -570,6 +583,9 @@
 
   // scoreboard style
   document.querySelectorAll('.stylebtn').forEach(b=>b.addEventListener('click',()=>push({ style:b.dataset.style })));
+
+  // soundboard — reuses the fx channel (audio plays out of the overlay)
+  document.querySelectorAll('[data-sfx]').forEach(b=>b.addEventListener('click',()=>push({ fx:b.dataset.sfx })));
 
   // overlay visibility toggle
   $('hidebtn').addEventListener('click', ()=>push({ visible: !S.visible }));
