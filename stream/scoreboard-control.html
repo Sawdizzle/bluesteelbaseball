@@ -44,9 +44,10 @@
     text-transform:uppercase;margin-bottom:.6rem}
 
   /* summary strip */
-  .summary{font-family:'Martian Mono',monospace;font-size:.82rem;color:var(--steel-strong);
-    text-align:center;letter-spacing:.04em;background:rgba(6,9,16,.5);border:1px solid var(--chalk-line);
-    border-radius:8px;padding:.55rem;margin-bottom:.7rem}
+  .summary{position:sticky;top:6px;z-index:20;font-family:'Martian Mono',monospace;font-size:.82rem;
+    color:var(--steel-strong);text-align:center;letter-spacing:.03em;background:rgba(10,14,22,.93);
+    border:1px solid var(--chalk-line);border-radius:8px;padding:.6rem;margin-bottom:.7rem;
+    backdrop-filter:blur(7px);box-shadow:0 8px 20px rgba(0,0,0,.4)}
 
   /* score cards */
   .score{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
@@ -145,6 +146,21 @@
     font-size:.98rem;color:var(--chalk);background:rgba(242,240,233,.05);border:1px solid var(--chalk-line);
     border-radius:7px;padding:.5rem .6rem;margin-bottom:.45rem}
   .pname-input:focus{outline:none;border-color:var(--steel)}
+  /* live B/S/O readout under the at-bat buttons */
+  .countbar{margin-top:.7rem;display:flex;flex-direction:column;gap:.4rem}
+  .countbar .crow{margin-bottom:0}
+  /* collapsible setup */
+  details.setup{padding:0;overflow:hidden}
+  details.setup>summary{list-style:none;cursor:pointer;padding:.95rem;font-family:'Martian Mono',monospace;
+    font-size:.62rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;
+    display:flex;align-items:center;justify-content:space-between}
+  details.setup>summary::-webkit-details-marker{display:none}
+  details.setup>summary::after{content:'▸';color:var(--faint);font-size:.8rem}
+  details.setup[open]>summary::after{content:'▾'}
+  details.setup>summary:hover{color:var(--chalk)}
+  .setup-body{padding:0 .95rem 1.05rem}
+  .grouplab2{font-family:'Martian Mono',monospace;font-size:.56rem;letter-spacing:.2em;color:var(--faint);
+    text-transform:uppercase;margin:.2rem 0 .5rem}
 </style>
 </head>
 <body>
@@ -189,45 +205,37 @@
       </div>
     </div>
 
-    <!-- quick at-bat -->
+    <!-- at bat: quick count buttons + live B/S/O readout -->
     <div class="card" style="margin-top:.7rem">
       <h2>At bat</h2>
-      <div class="actions" style="grid-template-columns:1fr 1fr 1fr 1fr">
+      <div class="actions" style="grid-template-columns:repeat(4,1fr)">
         <button class="btn primary" id="q-ball">Ball</button>
         <button class="btn clay" id="q-strike">Strike</button>
         <button class="btn" id="q-foul">Foul</button>
         <button class="btn clay" id="q-out">Out</button>
       </div>
+      <div class="countbar">
+        <div class="crow"><span class="lab">B</span><div class="seg" id="seg-balls"></div></div>
+        <div class="crow"><span class="lab">S</span><div class="seg" id="seg-strikes"></div></div>
+        <div class="crow"><span class="lab">O</span><div class="seg" id="seg-outs"></div></div>
+      </div>
     </div>
 
-    <!-- count -->
+    <!-- runners + inning -->
     <div class="card">
-      <h2>Count</h2>
-      <div class="crow"><span class="lab">Balls</span><div class="seg" id="seg-balls"></div></div>
-      <div class="crow"><span class="lab">Strk</span><div class="seg" id="seg-strikes"></div></div>
-      <div class="crow"><span class="lab">Outs</span><div class="seg" id="seg-outs"></div></div>
-    </div>
-
-    <!-- bases -->
-    <div class="card">
-      <h2>Runners on</h2>
+      <h2>Runners &amp; inning</h2>
       <div class="seg">
         <button class="pill clay" data-base="base1" id="base1">1st</button>
         <button class="pill clay" data-base="base2" id="base2">2nd</button>
         <button class="pill clay" data-base="base3" id="base3">3rd</button>
       </div>
-    </div>
-
-    <!-- inning -->
-    <div class="card">
-      <h2>Inning</h2>
-      <div class="inning-row">
-        <button class="pill" id="inn-minus" style="max-width:72px">−</button>
+      <div class="inning-row" style="margin-top:.6rem">
+        <button class="pill" id="inn-minus" style="max-width:64px">−</button>
         <div class="num" id="inn-num">1</div>
-        <button class="pill" id="inn-plus" style="max-width:72px">＋</button>
+        <button class="pill" id="inn-plus" style="max-width:64px">＋</button>
         <button class="pill halfbtn clay" id="half">▲ Top</button>
       </div>
-      <div class="actions" style="margin-top:.6rem">
+      <div class="actions" style="margin-top:.55rem">
         <button class="btn" id="newhalf">New ½ inning</button>
         <button class="btn" id="clearcount">Clear count</button>
       </div>
@@ -251,57 +259,56 @@
       </div>
     </div>
 
-    <!-- status + setup -->
+    <!-- banner -->
     <div class="card">
-      <h2>Banner &amp; setup</h2>
+      <h2>Banner</h2>
       <div class="rowline">
-        <input type="text" id="status" placeholder="Banner (e.g. FINAL, RAIN DELAY)" maxlength="22" />
-        <button class="btn" id="status-set" style="max-width:90px">Set</button>
+        <input type="text" id="status" placeholder="FINAL, RAIN DELAY…" maxlength="22" />
+        <button class="btn" id="status-set" style="max-width:80px">Set</button>
       </div>
       <div class="actions" style="grid-template-columns:1fr 1fr 1fr;margin-top:.5rem">
         <button class="btn clay" data-status="MID">MID</button>
         <button class="btn clay" data-status="FINAL">FINAL</button>
         <button class="btn" data-status="">Clear</button>
       </div>
-      <div class="crow" style="margin-top:.7rem">
-        <span class="lab" style="width:auto">Blue&nbsp;Steel&nbsp;is</span>
-        <div class="toggle" style="flex:1">
+    </div>
+
+    <!-- setup (collapsed until needed) -->
+    <details class="card setup">
+      <summary>Game setup — teams &amp; options</summary>
+      <div class="setup-body">
+        <div class="grouplab2">Teams — names &amp; photos</div>
+        <div class="photo">
+          <div class="thumb" id="thumb-away"></div>
+          <div class="pcol">
+            <input class="pname-input" id="tn-away" placeholder="Opponent name" maxlength="18" />
+            <div class="prow">
+              <label class="btn tiny"><input type="file" accept="image/*" id="file-away" hidden />Upload photo</label>
+              <button class="btn tiny" id="clear-away">Clear</button>
+            </div>
+          </div>
+        </div>
+        <div class="photo" style="margin-top:.65rem">
+          <div class="thumb" id="thumb-home"></div>
+          <div class="pcol">
+            <input class="pname-input" id="tn-home" placeholder="Your team name" maxlength="18" />
+            <div class="prow">
+              <label class="btn tiny"><input type="file" accept="image/*" id="file-home" hidden />Upload photo</label>
+              <button class="btn tiny" id="clear-home">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grouplab2" style="margin-top:1rem">Which side is Blue Steel?</div>
+        <div class="toggle">
           <button class="pill" data-accent="away" id="acc-away">Away</button>
           <button class="pill" data-accent="home" id="acc-home">Home</button>
         </div>
-      </div>
-    </div>
 
-    <!-- teams: names + photos -->
-    <div class="card">
-      <h2>Teams — names &amp; photos</h2>
-      <div class="photo">
-        <div class="thumb" id="thumb-away"></div>
-        <div class="pcol">
-          <input class="pname-input" id="tn-away" placeholder="Opponent name" maxlength="18" />
-          <div class="prow">
-            <label class="btn tiny"><input type="file" accept="image/*" id="file-away" hidden />Upload photo</label>
-            <button class="btn tiny" id="clear-away">Clear</button>
-          </div>
-        </div>
+        <button class="btn clay" id="reset" style="width:100%;margin-top:1rem">Reset game 0–0</button>
+        <p class="minihint">Opponent name matches who you’re playing. Photos shrink to a small logo automatically; Clear reverts to the skull / initial.</p>
       </div>
-      <div class="photo" style="margin-top:.65rem">
-        <div class="thumb" id="thumb-home"></div>
-        <div class="pcol">
-          <input class="pname-input" id="tn-home" placeholder="Your team name" maxlength="18" />
-          <div class="prow">
-            <label class="btn tiny"><input type="file" accept="image/*" id="file-home" hidden />Upload photo</label>
-            <button class="btn tiny" id="clear-home">Clear</button>
-          </div>
-        </div>
-      </div>
-      <p class="minihint">Type the opponent’s name to match who you’re playing. Photos are shrunk to a small logo automatically; Clear reverts to the skull (your team) or the initial.</p>
-    </div>
-
-    <div class="actions" style="margin-top:.2rem">
-      <button class="btn clay" id="reset">Reset game 0–0</button>
-      <button class="btn primary" id="showbtn">Show overlay</button>
-    </div>
+    </details>
   </div>
 </div>
 
@@ -466,9 +473,8 @@
     $('acc-home').classList.toggle('on', S.accent_side==='home');
     // status field
     if(document.activeElement!==$('status')) $('status').value=S.status||'';
-    // hide/show button label
-    $('hidebtn').textContent = S.visible ? 'Hide overlay' : 'Overlay hidden';
-    $('showbtn').textContent = S.visible ? 'Overlay live' : 'Show overlay';
+    // overlay visibility toggle
+    $('hidebtn').textContent = S.visible ? 'Hide overlay' : 'Show overlay';
     // summary
     const a=S.away_name, h=S.home_name;
     const arrow=S.half==='top'?'▲':'▼';
@@ -544,9 +550,8 @@
   // accent
   document.querySelectorAll('[data-accent]').forEach(b=>b.addEventListener('click',()=>push({ accent_side:b.dataset.accent })));
 
-  // visibility
-  $('hidebtn').addEventListener('click', ()=>push({ visible:false }));
-  $('showbtn').addEventListener('click', ()=>push({ visible:true }));
+  // overlay visibility toggle
+  $('hidebtn').addEventListener('click', ()=>push({ visible: !S.visible }));
 
   $('reset').addEventListener('click', ()=>{
     if(!confirm('Reset the game to 0–0, inning 1?')) return;
