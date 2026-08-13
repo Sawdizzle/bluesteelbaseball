@@ -71,6 +71,20 @@
       <div id="dash" hidden>
 
         <div class="panel admin-card plate">
+          <h3>Live stream</h3>
+          <p class="note" style="margin-top: 0.4rem;">Game-day overlays and the realtime scoreboard for your streams. The scoreboard control uses this same username &amp; PIN — no separate login.</p>
+          <div class="hero-actions" style="margin-top: 1rem;">
+            <a class="button button-primary" href="/stream/scoreboard-control" target="_blank" rel="noopener">Open scoreboard control</a>
+            <a class="button button-secondary" href="/stream" target="_blank" rel="noopener">Stream toolkit &amp; overlays</a>
+          </div>
+          <div class="field" style="margin-top: 1.1rem;">
+            <label for="obs-url">OBS Browser Source URL — scoreboard overlay</label>
+            <input id="obs-url" type="text" readonly value="https://bluesteelbaseball.com/stream/scoreboard" onclick="this.select()" />
+          </div>
+          <p class="note" style="margin-top: 0.55rem; font-size: var(--text-xs);">Add this in OBS as a Browser Source at 1920×1080. Full setup lives in the stream toolkit.</p>
+        </div>
+
+        <div class="panel admin-card plate">
           <h3>Schedule &amp; scores</h3>
           <p class="note" style="margin-top: 0.4rem;">Games, times, and scores are handled in <strong>GameChanger</strong> and appear on the site automatically — nothing to enter here. Keep score in the GameChanger app and the Home and <a href="/schedule" style="color: var(--steel);">Schedule</a> pages update on their own.</p>
         </div>
