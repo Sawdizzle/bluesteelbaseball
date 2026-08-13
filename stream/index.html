@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- Served at /stream (no trailing slash) under cleanUrls, so relative links would
+     resolve against the site root. This pins them to the /stream/ folder. -->
+<base href="/stream/" />
 <title>Blue Steel — Stream Transitions</title>
 <link rel="preconnect" href="https://api.fontshare.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -150,6 +153,29 @@
           <li><code>starting-soon.html?meta=Blue Steel vs Rivals · 6:00 PM</code></li>
         </ol>
         <p>Spaces are fine when you type them in OBS. The “Starting Soon…” headline and the animated dot/rail loop continuously.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- BE RIGHT BACK -->
+  <div class="card">
+    <div class="head"><h2>Be Right Back</h2><span class="file">brb.html</span></div>
+    <p>Between-innings hold screen — a spinning baseball and “Middle of the Nth,” pulled live from your scoreboard. Drop it up during breaks, rain delays, or lineup changes.</p>
+    <div class="frame"><iframe src="brb.html" title="Be Right Back" loading="lazy"></iframe></div>
+    <div class="row">
+      <a class="btn" href="brb.html" target="_blank">Open full screen ↗</a>
+      <a class="btn" href="brb.html?msg=Rain%20Delay&sub=Back%20soon" target="_blank">Preview a delay ↗</a>
+    </div>
+    <details>
+      <summary>Notes &amp; customizing</summary>
+      <div class="obs">
+        <p>The inning line follows your live scoreboard automatically. Override anything via the URL:</p>
+        <ol>
+          <li><code>?msg=Rain Delay</code> — replaces the big “Be Right Back” headline</li>
+          <li><code>?sub=Grab a hot dog</code> — replaces the “Middle of the…” line</li>
+          <li><code>?inning=7</code> — pins the inning (skips the live hookup)</li>
+        </ol>
+        <p>Add it in OBS the same way as Starting Soon — a full-screen Browser Source at 1920×1080.</p>
       </div>
     </details>
   </div>

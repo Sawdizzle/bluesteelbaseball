@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blue Steel — Be Right Back</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://api.fontshare.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=supreme@400,500,700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --field:#0a0e16; --field-deep:#060910; --dugout:#121a29;
+    --chalk:#f2f0e9; --muted:#93a3b8; --faint:#5f7086;
+    --steel:#7fc0ef; --steel-strong:#a9d8fa;
+    --clay:#c4653b; --clay-bright:#e0794a;
+    --chalk-line:rgba(242,240,233,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;color:var(--chalk);
+    font-family:'Supreme','Helvetica Neue',Arial,sans-serif}
+  body{
+    background:
+      radial-gradient(80rem 40rem at 82% -14%, rgba(127,192,239,.10), transparent 60%),
+      radial-gradient(60rem 40rem at 12% 120%, rgba(196,101,59,.08), transparent 60%),
+      linear-gradient(180deg, var(--field-deep) 0%, var(--field) 40%, #0b1220 100%);
+  }
+
+  /* slow sweeping stadium light */
+  #sweep{position:fixed;inset:-20%;background:
+     conic-gradient(from 210deg at 78% -10%, transparent 0deg, rgba(169,216,250,.10) 22deg, transparent 46deg);
+     animation:sweep 14s linear infinite;pointer-events:none;mix-blend-mode:screen}
+  @keyframes sweep{to{transform:rotate(360deg)}}
+
+  /* freshly raked infield — faint chalk arcs */
+  #rake{position:fixed;left:50%;bottom:-40vh;width:170vh;height:170vh;transform:translateX(-50%);
+    border-radius:50%;pointer-events:none;opacity:.5;
+    background:repeating-radial-gradient(circle at 50% 50%,
+      transparent 0 26px, rgba(242,240,233,.035) 26px 27px)}
+  #diamond{position:fixed;left:50%;bottom:-26vh;width:150vh;height:150vh;
+    transform:translateX(-50%) rotate(45deg);border:2px solid rgba(242,240,233,.06);opacity:.5;pointer-events:none}
+
+  .mote{position:fixed;border-radius:50%;background:rgba(169,216,250,.5);filter:blur(.5px);
+    animation:rise linear infinite;pointer-events:none}
+  @keyframes rise{0%{transform:translateY(0);opacity:0}12%{opacity:.7}88%{opacity:.5}100%{transform:translateY(-108vh);opacity:0}}
+
+  main{position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2.2vh;z-index:2;text-align:center;padding:4vh 4vw}
+
+  /* ---- spinning baseball ---- */
+  .ball-wrap{position:relative;width:min(30vh,300px);height:min(30vh,300px);
+    animation:bob 5s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  .ball-glow{position:absolute;inset:-14%;border-radius:50%;
+    background:radial-gradient(circle,rgba(127,192,239,.22),transparent 62%);filter:blur(6px);
+    animation:pulse 4.5s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.9;transform:scale(1.06)}}
+  .ball{width:100%;height:100%;animation:spin 9s linear infinite;filter:drop-shadow(0 14px 30px rgba(6,9,16,.6))}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .wordmark{font-family:'Tanker','Arial Black',sans-serif;text-transform:uppercase;
+    font-size:clamp(2.6rem,7.5vw,6.4rem);letter-spacing:.11em;line-height:.92;
+    background:linear-gradient(180deg,var(--chalk),#c9d6e6);-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:in 900ms ease 200ms both}
+  .board{display:inline-flex;align-items:center;gap:.9rem;
+    padding:.85rem 1.9rem;background:rgba(18,26,41,.72);border:1px solid var(--chalk-line);
+    clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
+    backdrop-filter:blur(4px);animation:in 900ms ease 420ms both}
+  .dot{width:12px;height:12px;border-radius:50%;background:var(--clay-bright);box-shadow:0 0 14px var(--clay-bright);
+    animation:blink 1.4s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+  .board b{font-family:'Tanker','Arial Black',sans-serif;font-weight:400;letter-spacing:.2em;
+    font-size:clamp(1rem,2.6vw,1.8rem);text-transform:uppercase;color:var(--steel-strong)}
+  .ell::after{content:"";animation:ell 1.6s steps(4,end) infinite}
+  @keyframes ell{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+
+  .score{font-family:'Martian Mono',monospace;font-size:clamp(.7rem,1.5vw,1rem);letter-spacing:.14em;
+    color:var(--muted);text-transform:uppercase;min-height:1.2em;animation:in 900ms ease 560ms both}
+  .score b{color:var(--chalk)}
+  .brand{font-family:'Martian Mono',monospace;font-size:clamp(.58rem,1.1vw,.76rem);letter-spacing:.4em;
+    color:var(--faint);text-transform:uppercase;margin-top:.6vh;animation:in 900ms ease 700ms both}
+  @keyframes in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+  .rail{position:fixed;left:0;bottom:0;width:100%;height:4px;background:rgba(242,240,233,.06)}
+  .rail i{display:block;height:100%;width:34%;
+    background:linear-gradient(90deg,transparent,var(--clay-bright),var(--steel),transparent);
+    animation:rail 3.4s ease-in-out infinite}
+  @keyframes rail{0%{transform:translateX(-40%)}100%{transform:translateX(320%)}}
+</style>
+</head>
+<body>
+  <div id="sweep"></div>
+  <div id="rake"></div>
+  <div id="diamond"></div>
+  <main>
+    <div class="ball-wrap">
+      <div class="ball-glow"></div>
+      <svg class="ball" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <radialGradient id="bg" cx="38%" cy="34%" r="72%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="62%" stop-color="#eef1f4"/>
+            <stop offset="100%" stop-color="#c3ccd6"/>
+          </radialGradient>
+        </defs>
+        <circle cx="50" cy="50" r="46" fill="url(#bg)" stroke="rgba(6,9,16,.25)" stroke-width="1"/>
+        <!-- two curved seams with clay stitches -->
+        <g fill="none" stroke="#c4653b" stroke-width="2.4" stroke-linecap="round">
+          <path d="M22 12 C 40 34, 40 66, 22 88"/>
+          <path d="M78 12 C 60 34, 60 66, 78 88"/>
+        </g>
+        <g stroke="#e0794a" stroke-width="1.5" stroke-linecap="round">
+          <line x1="24" y1="20" x2="33" y2="18"/><line x1="21" y1="30" x2="30" y2="29"/>
+          <line x1="20" y1="42" x2="29" y2="42"/><line x1="20" y1="54" x2="29" y2="55"/>
+          <line x1="21" y1="66" x2="30" y2="68"/><line x1="24" y1="78" x2="33" y2="81"/>
+          <line x1="76" y1="20" x2="67" y2="18"/><line x1="79" y1="30" x2="70" y2="29"/>
+          <line x1="80" y1="42" x2="71" y2="42"/><line x1="80" y1="54" x2="71" y2="55"/>
+          <line x1="79" y1="66" x2="70" y2="68"/><line x1="76" y1="78" x2="67" y2="81"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="wordmark" id="headline">Be Right Back</div>
+    <div class="board"><span class="dot"></span><b id="sub">Middle of the Inning<span class="ell"></span></b></div>
+    <div class="score" id="score"></div>
+    <div class="brand">Blue Steel Baseball</div>
+  </main>
+  <div class="rail"><i></i></div>
+
+<script type="module">
+  const q = new URLSearchParams(location.search);
+  const $ = (id) => document.getElementById(id);
+  if (q.get('msg')) $('headline').textContent = q.get('msg');
+
+  const ORD = (n) => {
+    const s = ['th','st','nd','rd'], v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+
+  // Custom sub line via ?sub=, else "Middle of the Nth" from the live inning.
+  function setSub(text){ $('sub').innerHTML = `${text}<span class="ell"></span>`; }
+  if (q.get('sub')) setSub(q.get('sub'));
+
+  function applyState(s){
+    if (!q.get('sub')) setSub(`Middle of the ${ORD(s.inning || 1)}`);
+    if (q.has('score') || (s.away_score != null && s.home_score != null && (s.away_score || s.home_score))){
+      $('score').innerHTML = `${s.away_name} <b>${s.away_score}</b> &nbsp;–&nbsp; <b>${s.home_score}</b> ${s.home_name}`;
+    }
+  }
+
+  // Live inning/score from the scoreboard — but never break the screen if offline.
+  // ?inning=5 forces a value and skips the live hookup.
+  if (q.get('inning')) {
+    setSub(q.get('sub') || `Middle of the ${ORD(parseInt(q.get('inning'), 10) || 1)}`);
+  } else {
+    try {
+      const { getScoreboard, onScoreboard } = await import('./scoreboard-shared.js');
+      applyState(await getScoreboard());
+      onScoreboard(applyState);
+    } catch (e) {
+      if (!q.get('sub')) setSub('Be Right Back');   // graceful fallback
+    }
+  }
+
+  // drifting motes
+  for (let i = 0; i < 20; i++) {
+    const m = document.createElement('div'); m.className = 'mote';
+    const s = 1 + (i % 3);
+    m.style.width = m.style.height = s + 'px';
+    m.style.left = ((i * 97) % 100) + 'vw'; m.style.bottom = '-4vh';
+    m.style.animationDuration = (9 + (i % 7)) + 's'; m.style.animationDelay = (-(i * 0.9)) + 's';
+    document.body.appendChild(m);
+  }
+</script>
+</body>
+</html>
