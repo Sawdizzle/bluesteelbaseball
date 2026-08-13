@@ -111,6 +111,22 @@
   #login input{font:inherit;color:var(--chalk);background:rgba(242,240,233,.05);border:1px solid var(--chalk-line);border-radius:8px;padding:.7rem .8rem}
   #login .msg{margin-top:.7rem;font-family:'Martian Mono',monospace;font-size:.72rem;color:var(--loss);min-height:1rem}
   .hide{display:none!important}
+
+  /* big plays + team photos */
+  .btn.big{min-height:58px;font-size:.94rem}
+  .minihint{font-family:'Martian Mono',monospace;font-size:.6rem;color:var(--faint);margin-top:.55rem;
+    letter-spacing:.03em;line-height:1.5}
+  .photo{display:flex;align-items:center;gap:.75rem}
+  .thumb{width:54px;height:54px;flex:none;border-radius:9px;border:1px solid var(--chalk-line);
+    background:rgba(242,240,233,.05) center/contain no-repeat;display:grid;place-items:center;
+    color:var(--faint);font-family:'Tanker','Arial Black',sans-serif;font-size:1.2rem;overflow:hidden}
+  .pcol{flex:1;min-width:0}
+  .pname{font-family:'Tanker','Arial Black',sans-serif;text-transform:uppercase;letter-spacing:.04em;
+    font-size:.98rem;margin-bottom:.45rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .prow{display:flex;gap:.45rem}
+  .btn.tiny{min-height:40px;font-size:.66rem;padding:0 .9rem;flex:0 0 auto;display:inline-flex;
+    align-items:center;justify-content:center}
+  label.btn{cursor:pointer}
 </style>
 </head>
 <body>
@@ -166,6 +182,18 @@
       </div>
     </div>
 
+    <!-- big plays -->
+    <div class="card">
+      <h2>Big plays — animation + auto-score</h2>
+      <div class="actions" style="grid-template-columns:1fr 1fr">
+        <button class="btn primary big" id="fx-hr">Home Run</button>
+        <button class="btn primary big" id="fx-run">Run Scores</button>
+        <button class="btn big" id="fx-bb">Walk / BB</button>
+        <button class="btn big" id="fx-hbp">HBP</button>
+      </div>
+      <p class="minihint">Fires the animation on the overlay and updates the batting team’s score &amp; bases automatically. HR clears the bases and scores every runner.</p>
+    </div>
+
     <!-- count -->
     <div class="card">
       <h2>Count</h2>
@@ -218,6 +246,32 @@
           <button class="pill" data-accent="home" id="acc-home">Home</button>
         </div>
       </div>
+    </div>
+
+    <!-- team photos -->
+    <div class="card">
+      <h2>Team photos</h2>
+      <div class="photo">
+        <div class="thumb" id="thumb-away"></div>
+        <div class="pcol">
+          <div class="pname" id="pn-away">Away</div>
+          <div class="prow">
+            <label class="btn tiny"><input type="file" accept="image/*" id="file-away" hidden />Upload photo</label>
+            <button class="btn tiny" id="clear-away">Clear</button>
+          </div>
+        </div>
+      </div>
+      <div class="photo" style="margin-top:.65rem">
+        <div class="thumb" id="thumb-home"></div>
+        <div class="pcol">
+          <div class="pname" id="pn-home">Blue Steel</div>
+          <div class="prow">
+            <label class="btn tiny"><input type="file" accept="image/*" id="file-home" hidden />Upload photo</label>
+            <button class="btn tiny" id="clear-home">Clear</button>
+          </div>
+        </div>
+      </div>
+      <p class="minihint">Pick from your camera roll — photos are shrunk to a small logo automatically. Clear reverts to the skull (your team) or the opponent’s initial.</p>
     </div>
 
     <div class="actions" style="margin-top:.2rem">
@@ -285,17 +339,53 @@
   }
   function addStrike(){ const st=(S.strikes||0)+1; if(st>=3) addOut(); else push({ strikes:st }); }
   function addFoul(){ push({ strikes:Math.min(2,(S.strikes||0)+1) }); }
-  function addBall(){
-    const b=(S.balls||0)+1;
-    if(b<4){ push({ balls:b }); return; }
-    // walk: force-advance runners; run scores only if bases loaded
-    const p={ balls:0, strikes:0 };
-    const side=battingSide();
+  const runnersOn = () => (S.base1?1:0)+(S.base2?1:0)+(S.base3?1:0);
+  // batter reaches first (walk/HBP): force-advance runners; a run scores only if loaded
+  function walkAdvance(){
+    const p={}; const side=battingSide();
     if(S.base1 && S.base2 && S.base3){ p[side+'_score']=Math.max(0,(S[side+'_score']||0)+1); p.base1=p.base2=p.base3=true; }
     else if(S.base1 && S.base2){ p.base3=true; p.base2=true; p.base1=true; }
     else if(S.base1){ p.base2=true; p.base1=true; }
     else { p.base1=true; }
-    push(p);
+    return p;
+  }
+  function addBall(){
+    const b=(S.balls||0)+1;
+    if(b<4){ push({ balls:b }); return; }
+    const p=walkAdvance(); p.balls=0; p.strikes=0; push(p);   // 4th ball = walk (no animation)
+  }
+
+  // big plays: play the overlay animation + apply the scoring
+  function fxHomeRun(){
+    const side=battingSide(); const runs=1+runnersOn();
+    push({ [side+'_score']:Math.max(0,(S[side+'_score']||0)+runs),
+      base1:false, base2:false, base3:false, balls:0, strikes:0, fx:'homerun' });
+  }
+  function fxRun(){ const side=battingSide(); push({ [side+'_score']:Math.max(0,(S[side+'_score']||0)+1), fx:'run' }); }
+  function fxWalk(kind){ const p=walkAdvance(); p.balls=0; p.strikes=0; p.fx=kind; push(p); }
+
+  // shrink an uploaded photo to a small square-ish logo data URI
+  function resizeImage(file, max=160){
+    return new Promise((res, rej)=>{
+      const url=URL.createObjectURL(file); const img=new Image();
+      img.onload=()=>{
+        const scale=Math.min(1, max/Math.max(img.width, img.height));
+        const w=Math.max(1,Math.round(img.width*scale)), h=Math.max(1,Math.round(img.height*scale));
+        const c=document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        URL.revokeObjectURL(url);
+        let out; try{ out=c.toDataURL('image/webp',0.85); }catch{ out=''; }
+        if(!out || out.indexOf('data:image/webp')!==0) out=c.toDataURL('image/png');
+        res(out);
+      };
+      img.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error('Could not read that image')); };
+      img.src=url;
+    });
+  }
+  function setThumb(side, logo, name){
+    const el=$('thumb-'+side);
+    if(logo){ el.style.backgroundImage=`url("${logo}")`; el.textContent=''; }
+    else { el.style.backgroundImage='none'; el.textContent=(String(name).trim()[0]||'?').toUpperCase(); }
   }
 
   // ---------- reflect state to controls ----------
@@ -312,6 +402,9 @@
     $('s-away').textContent=S.away_score; $('s-home').textContent=S.home_score;
     if(document.activeElement!==$('n-away')) $('n-away').value=S.away_name;
     if(document.activeElement!==$('n-home')) $('n-home').value=S.home_name;
+    // team photos
+    setThumb('away', S.away_logo, S.away_name); setThumb('home', S.home_logo, S.home_name);
+    $('pn-away').textContent=S.away_name; $('pn-home').textContent=S.home_name;
     $('c-away').classList.toggle('accent', S.accent_side==='away');
     $('c-home').classList.toggle('accent', S.accent_side==='home');
     $('c-away').classList.toggle('batting', S.half==='top');
@@ -350,6 +443,23 @@
   $('q-strike').addEventListener('click', addStrike);
   $('q-foul').addEventListener('click', addFoul);
   $('q-out').addEventListener('click', addOut);
+
+  // big plays
+  $('fx-hr').addEventListener('click', fxHomeRun);
+  $('fx-run').addEventListener('click', fxRun);
+  $('fx-bb').addEventListener('click', ()=>fxWalk('walk'));
+  $('fx-hbp').addEventListener('click', ()=>fxWalk('hbp'));
+
+  // team photos
+  ['away','home'].forEach(side=>{
+    $('file-'+side).addEventListener('change', async (e)=>{
+      const f=e.target.files && e.target.files[0]; if(!f) return;
+      try { toast('Adding photo…'); const dataUrl=await resizeImage(f); push({ [side+'_logo']: dataUrl }); }
+      catch(err){ toast(err.message||'Bad image', true); }
+      finally { e.target.value=''; }
+    });
+    $('clear-'+side).addEventListener('click', ()=>push({ [side+'_logo']: '' }));
+  });
 
   // count segment taps (direct set / correction)
   ['seg-balls','seg-strikes','seg-outs'].forEach(segId=>{
