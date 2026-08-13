@@ -151,7 +151,20 @@
         <div class="src-h"><b>Ticker</b><span>Scrolling sponsor / announcement bar. Set text with <code>?items=Joe’s Pizza|Smith Auto|Go Blue Steel</code> (separate with <code>|</code>), <code>?pos=top</code> to move it up.</span></div>
         <div class="copyrow"><input readonly value="https://bluesteelbaseball.vercel.app/stream/ticker" /><button class="copy">Copy</button></div>
       </div>
+      <div class="src">
+        <div class="src-h"><b>Now Batting</b><span>Lower-third with the batter’s #, name &amp; stat line. Set it from the phone control (“Now batting”); hides when cleared.</span></div>
+        <div class="copyrow"><input readonly value="https://bluesteelbaseball.vercel.app/stream/nowbatting" /><button class="copy">Copy</button></div>
+      </div>
+      <div class="src">
+        <div class="src-h"><b>Steel of the Game</b><span>Full-screen player spotlight — set name + line from the control; hidden until you show it.</span></div>
+        <div class="copyrow"><input readonly value="https://bluesteelbaseball.vercel.app/stream/spotlight" /><button class="copy">Copy</button></div>
+      </div>
+      <div class="src">
+        <div class="src-h"><b>K wall</b><span>Strikeout counter in the corner — the <b>K</b> button (or Now-batting card) adds one. <code>?pos=tl</code> to move it.</span></div>
+        <div class="copyrow"><input readonly value="https://bluesteelbaseball.vercel.app/stream/kwall" /><button class="copy">Copy</button></div>
+      </div>
     </div>
+    <div class="tip">Public <b>team stats page</b> for parents (not an OBS source): <input readonly value="https://bluesteelbaseball.vercel.app/stats" onclick="this.select()" style="width:100%;margin-top:.4rem;font-family:'Martian Mono',monospace;font-size:.76rem;color:var(--steel-strong);background:rgba(10,14,22,.7);border:1px solid var(--chalk-line);border-radius:6px;padding:.5rem .6rem" /></div>
 
     <div class="tip">Heads up: the custom domain <code>bluesteelbaseball.com</code> isn’t pointing at the app right now — use these <b>vercel.app</b> links and everything works.</div>
   </div>

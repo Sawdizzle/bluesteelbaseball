@@ -287,6 +287,22 @@
   #anchor[data-style="terminal"] .pip.on{background:#23ff6e!important;border-color:#23ff6e!important;box-shadow:0 0 8px #23ff6e!important}
   #anchor[data-style="terminal"] #bug::after{content:"";position:absolute;inset:0;pointer-events:none;
     background:repeating-linear-gradient(rgba(0,0,0,0) 0 2px, rgba(0,0,0,.14) 2px 3px);animation:jumboFlicker 5s steps(40) infinite}
+
+  /* ---- BUBBLEGUM: bright, rounded, playful (kids) ---- */
+  #anchor[data-style="bubblegum"] #bug{background:linear-gradient(180deg,#271748,#1a1030);border:3px solid #ff7ac6;
+    clip-path:none;border-radius:20px;box-shadow:0 12px 34px rgba(0,0,0,.5),0 0 0 3px rgba(122,232,255,.25),0 0 26px rgba(255,122,198,.3)}
+  #anchor[data-style="bubblegum"] .tname{color:#fff;text-shadow:0 2px 0 #ff7ac6,0 0 12px rgba(255,122,198,.6)}
+  #anchor[data-style="bubblegum"] .team.accent .tname{color:#8ff0ff;text-shadow:0 2px 0 #23a7c9,0 0 12px rgba(122,232,255,.6)}
+  #anchor[data-style="bubblegum"] .tscore{background:#ffd93b;color:#241640;border:2px solid #fff;border-radius:10px;text-shadow:none}
+  #anchor[data-style="bubblegum"] .chip{border-radius:50%;border:2px solid #ff7ac6;background:rgba(255,122,198,.15)}
+  #anchor[data-style="bubblegum"] .inning .num{color:#ffd93b;text-shadow:0 0 10px rgba(255,217,59,.6)}
+  #anchor[data-style="bubblegum"] .inning .arw{color:#8ff0ff}
+  #anchor[data-style="bubblegum"] .sep{background:rgba(255,255,255,.22)}
+  #anchor[data-style="bubblegum"] .base{border-radius:5px;border:2px solid #8ff0ff;background:transparent}
+  #anchor[data-style="bubblegum"] .base.on{background:linear-gradient(135deg,#ff7ac6,#ffd93b);border-color:#fff;box-shadow:0 0 16px #ff7ac6}
+  #anchor[data-style="bubblegum"] .odot.on{background:#ffd93b;border-color:#fff;box-shadow:0 0 10px #ffd93b}
+  #anchor[data-style="bubblegum"] .pip.on.ball{background:#8ff0ff!important;border-color:#fff!important;box-shadow:0 0 9px #8ff0ff!important}
+  #anchor[data-style="bubblegum"] .pip.on.strike{background:#ff7ac6!important;border-color:#fff!important;box-shadow:0 0 9px #ff7ac6!important}
 </style>
 </head>
 <body>
@@ -335,7 +351,7 @@
   if (q.has('bg')) document.body.classList.add('bg');
   const scale = parseFloat(q.get('scale'));
   if (scale > 0) anchor.style.transform = `scale(${scale})`;
-  const STYLES = ['classic','minimal','chalk','neon','jumbotron','synthwave','broadcast','terminal'];
+  const STYLES = ['classic','minimal','chalk','neon','jumbotron','synthwave','broadcast','terminal','bubblegum'];
   const forcedStyle = STYLES.includes(q.get('style')) ? q.get('style') : null;
   anchor.dataset.style = forcedStyle || 'classic';
 

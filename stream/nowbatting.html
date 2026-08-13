@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blue Steel — Now Batting</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://api.fontshare.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=supreme@400,500,700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --field-deep:#060910; --dugout:#121a29; --chalk:#f2f0e9; --muted:#93a3b8; --faint:#5f7086;
+    --steel:#7fc0ef; --steel-strong:#a9d8fa; --clay:#c4653b; --clay-bright:#e0794a; --chalk-line:rgba(242,240,233,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:transparent;font-family:'Supreme','Helvetica Neue',Arial,sans-serif;color:var(--chalk)}
+  body.bg{background:linear-gradient(120deg,#20303f,#0a121e)}
+
+  #wrap{position:fixed;left:44px;bottom:44px}
+  #wrap.br{left:auto;right:44px}
+  #wrap.tl{bottom:auto;top:44px}
+  #wrap.tr{left:auto;right:44px;bottom:auto;top:44px}
+
+  .card{display:flex;align-items:stretch;filter:drop-shadow(0 14px 34px rgba(0,0,0,.55));
+    transform:translateX(-30px);opacity:0;transition:transform .5s cubic-bezier(.2,.85,.2,1),opacity .5s ease}
+  .card.show{transform:translateX(0);opacity:1}
+
+  .num{flex:none;min-width:78px;display:flex;align-items:center;justify-content:center;padding:0 .5rem;
+    background:linear-gradient(180deg,var(--steel),var(--steel-strong));color:#081019;
+    font-family:'Martian Mono',monospace;font-weight:700;font-size:2.4rem;
+    clip-path:polygon(14px 0,100% 0,100% 100%,0 100%,0 14px)}
+  .body{background:rgba(10,14,22,.94);border:1px solid var(--chalk-line);border-left:none;padding:.7rem 1.5rem .7rem 1.2rem;
+    display:flex;flex-direction:column;justify-content:center;min-width:230px;position:relative;overflow:hidden;
+    clip-path:polygon(0 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%)}
+  .body::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--clay-bright);box-shadow:0 0 12px var(--clay-bright)}
+  .eyebrow{font-family:'Martian Mono',monospace;font-size:.56rem;letter-spacing:.34em;color:var(--steel);text-transform:uppercase}
+  .name{font-family:'Tanker','Arial Black',sans-serif;letter-spacing:.05em;text-transform:uppercase;font-size:1.7rem;line-height:1.05;white-space:nowrap;margin-top:.15rem}
+  .stat{font-family:'Martian Mono',monospace;font-size:.72rem;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-top:.28rem;white-space:nowrap;min-height:.9rem}
+  .sheen{position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.14) 50%,transparent 65%);
+    transform:translateX(-120%);animation:sheen 6s ease-in-out 1s infinite}
+  @keyframes sheen{0%{transform:translateX(-120%)}22%,100%{transform:translateX(160%)}}
+</style>
+</head>
+<body>
+  <div id="wrap">
+    <div class="card" id="card">
+      <div class="num" id="num">—</div>
+      <div class="body">
+        <div class="eyebrow" id="eyebrow">Now Batting</div>
+        <div class="name" id="name">—</div>
+        <div class="stat" id="stat"></div>
+        <div class="sheen"></div>
+      </div>
+    </div>
+  </div>
+
+<script type="module">
+  const q = new URLSearchParams(location.search);
+  const $ = (id) => document.getElementById(id);
+  if (q.has('bg')) document.body.classList.add('bg');
+  if (['br','tl','tr'].includes(q.get('pos'))) $('wrap').classList.add(q.get('pos'));
+  if (q.get('label')) $('eyebrow').textContent = q.get('label');
+
+  function render(s){
+    const has = !!(s.batter_name && s.batter_name.trim());
+    if (has){
+      $('num').textContent = s.batter_num ? s.batter_num : '';
+      $('num').style.display = s.batter_num ? 'flex' : 'none';
+      $('name').textContent = s.batter_name;
+      $('stat').textContent = s.batter_stat || '';
+    }
+    $('card').classList.toggle('show', has);
+  }
+
+  try {
+    const { getScoreboard, onScoreboard } = await import('./scoreboard-shared.js');
+    render(await getScoreboard());
+    onScoreboard(render);
+  } catch (e) { /* stays hidden if offline */ }
+</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blue Steel Baseball — Team Stats</title>
+<meta name="description" content="Blue Steel Baseball — Fall 2026 team & player stats." />
+<link rel="icon" href="/assets/favicon.ico" />
+<link rel="preconnect" href="https://api.fontshare.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=supreme@400,500,700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --field:#0a0e16; --field-deep:#060910; --dugout:#121a29; --dugout-2:#0e1520;
+    --chalk:#f2f0e9; --muted:#93a3b8; --faint:#5f7086;
+    --steel:#7fc0ef; --steel-strong:#a9d8fa; --clay:#c4653b; --clay-bright:#e0794a;
+    --win:#8fe3b0; --chalk-line:rgba(242,240,233,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Supreme','Helvetica Neue',Arial,sans-serif;color:var(--chalk);line-height:1.5;
+    background:radial-gradient(70rem 34rem at 82% -12%, rgba(127,192,239,.07), transparent 62%),
+      linear-gradient(180deg,var(--field-deep) 0%, var(--field) 34%, #0b1220 100%);min-height:100vh}
+  .wrap{width:min(100% - 2rem, 1140px);margin-inline:auto;padding:2.4rem 0 4rem}
+  header{display:flex;align-items:center;gap:1rem;margin-bottom:.3rem}
+  header img{width:54px;height:54px;object-fit:contain;
+    -webkit-mask:radial-gradient(circle at 50% 48%,#000 52%,transparent 74%);mask:radial-gradient(circle at 50% 48%,#000 52%,transparent 74%)}
+  h1{font-family:'Tanker','Arial Black',sans-serif;font-weight:400;letter-spacing:.06em;text-transform:uppercase;font-size:1.7rem;line-height:1}
+  .k{font-family:'Martian Mono',monospace;font-size:.58rem;letter-spacing:.3em;color:var(--faint);text-transform:uppercase;margin-top:.3rem}
+  .tabs{display:flex;gap:.5rem;margin:1.4rem 0 1rem;flex-wrap:wrap}
+  .tab{font-family:'Martian Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;
+    padding:.55rem 1rem;border:1px solid var(--chalk-line);background:rgba(10,14,22,.6);color:var(--muted);cursor:pointer;border-radius:7px}
+  .tab.on{border-color:var(--steel);color:var(--steel-strong);background:rgba(127,192,239,.1)}
+
+  .card{background:rgba(18,26,41,.5);border:1px solid var(--chalk-line);border-radius:12px;overflow:hidden}
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;min-width:720px}
+  thead th{font-family:'Martian Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);
+    text-align:right;padding:.9rem .6rem;border-bottom:1px solid var(--chalk-line);cursor:pointer;white-space:nowrap;user-select:none;position:sticky;top:0;background:#0d1420}
+  thead th.l{text-align:left}
+  thead th:hover{color:var(--chalk)}
+  thead th.sorted{color:var(--steel-strong)}
+  thead th .arw{opacity:.6;font-size:.8em}
+  tbody td{padding:.72rem .6rem;text-align:right;font-family:'Martian Mono',monospace;font-size:.92rem;border-bottom:1px solid rgba(242,240,233,.06);white-space:nowrap}
+  tbody td.l{text-align:left;font-family:'Supreme',sans-serif}
+  tbody tr{animation:rowin .5s ease both}
+  tbody tr:hover{background:rgba(127,192,239,.05)}
+  @keyframes rowin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .num{display:inline-grid;place-items:center;width:1.9rem;height:1.9rem;border-radius:6px;background:rgba(127,192,239,.12);
+    color:var(--steel-strong);font-family:'Martian Mono',monospace;font-weight:700;font-size:.82rem;margin-right:.6rem}
+  .pname{font-family:'Tanker','Arial Black',sans-serif;letter-spacing:.02em;text-transform:uppercase;font-size:1rem}
+  .pos{color:var(--faint);font-size:.78rem;margin-left:.4rem;font-family:'Martian Mono',monospace}
+  td.hl{color:var(--steel-strong);font-weight:700}
+  .lead{color:var(--win)!important}
+  .empty{padding:3.5rem 1.5rem;text-align:center;color:var(--muted)}
+  .empty b{display:block;font-family:'Tanker','Arial Black',sans-serif;font-size:1.4rem;color:var(--chalk);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.4rem}
+  .note{color:var(--faint);font-size:.8rem;font-family:'Martian Mono',monospace;letter-spacing:.06em;margin-top:1rem;text-align:center}
+  a.home{color:var(--steel);text-decoration:none;font-family:'Martian Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="/assets/logo.webp" alt="Blue Steel" />
+    <div><h1>Team Stats</h1><div class="k" id="season">Blue Steel Baseball · Fall 2026</div></div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab on" data-tab="batting">Batting</button>
+    <button class="tab" data-tab="pitching">Pitching</button>
+  </div>
+
+  <div class="card"><div class="scroll"><table id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></div>
+  <p class="note" id="note">Tap a column to sort.</p>
+  <p style="text-align:center;margin-top:1.4rem"><a class="home" href="/">← Blue Steel Baseball</a></p>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  import { SUPABASE_URL, SUPABASE_KEY } from '/js/config.js';
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY, { db: { schema: 'bluesteel' } });
+
+  const $ = (id) => document.getElementById(id);
+  const n = (v) => Number(v) || 0;
+  const avg = (h, ab) => ab > 0 ? (h/ab) : 0;
+  const obp = (p) => (n(p.ab)+n(p.bb)+n(p.hbp))>0 ? (n(p.h)+n(p.bb)+n(p.hbp))/(n(p.ab)+n(p.bb)+n(p.hbp)) : 0;
+  const slg = (p) => n(p.ab)>0 ? ((n(p.h)-n(p.b2)-n(p.b3)-n(p.hr)) + 2*n(p.b2) + 3*n(p.b3) + 4*n(p.hr))/n(p.ab) : 0;
+  const era = (p) => n(p.ip)>0 ? (n(p.er)*9/n(p.ip)) : 0;
+  const d3 = (x) => x ? x.toFixed(3).replace(/^0/, '') : '.000';   // .375
+  const d2 = (x) => x.toFixed(2);
+
+  // column defs per tab: [key, label, className, formatter, sortValue]
+  const BATTING = [
+    ['name','Player','l', (p)=>`<span class="num">${p.number??''}</span><span class="pname">${esc(p.name)}</span><span class="pos">${esc(p.position||'')}</span>`, (p)=>p.sort_order],
+    ['avg','AVG','hl',(p)=>d3(avg(n(p.h),n(p.ab))),(p)=>avg(n(p.h),n(p.ab))],
+    ['obp','OBP','',(p)=>d3(obp(p)),(p)=>obp(p)],
+    ['slg','SLG','',(p)=>d3(slg(p)),(p)=>slg(p)],
+    ['ops','OPS','',(p)=>d3(obp(p)+slg(p)),(p)=>obp(p)+slg(p)],
+    ['h','H','',(p)=>n(p.h),(p)=>n(p.h)],
+    ['hr','HR','',(p)=>n(p.hr),(p)=>n(p.hr)],
+    ['rbi','RBI','',(p)=>n(p.rbi),(p)=>n(p.rbi)],
+    ['r','R','',(p)=>n(p.r),(p)=>n(p.r)],
+    ['sb','SB','',(p)=>n(p.sb),(p)=>n(p.sb)],
+    ['bb','BB','',(p)=>n(p.bb),(p)=>n(p.bb)],
+    ['so','SO','',(p)=>n(p.so),(p)=>n(p.so)],
+    ['ab','AB','',(p)=>n(p.ab),(p)=>n(p.ab)],
+    ['gp','GP','',(p)=>n(p.gp),(p)=>n(p.gp)],
+  ];
+  const PITCHING = [
+    ['name','Pitcher','l',(p)=>`<span class="num">${p.number??''}</span><span class="pname">${esc(p.name)}</span>`, (p)=>p.sort_order],
+    ['era','ERA','hl',(p)=>n(p.ip)>0?d2(era(p)):'—',(p)=>era(p)],
+    ['ip','IP','',(p)=>n(p.ip),(p)=>n(p.ip)],
+    ['k','K','',(p)=>n(p.k),(p)=>n(p.k)],
+    ['bb_allowed','BB','',(p)=>n(p.bb_allowed),(p)=>n(p.bb_allowed)],
+    ['er','ER','',(p)=>n(p.er),(p)=>n(p.er)],
+  ];
+  const esc = (s)=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  let players = [], tab = 'batting', sortKey = null, sortDir = -1;
+
+  function cols(){ return tab==='batting' ? BATTING : PITCHING; }
+  function rows(){ return tab==='pitching' ? players.filter(p=>n(p.ip)>0) : players; }
+
+  function render(){
+    const c = cols();
+    $('thead').innerHTML = '<tr>' + c.map(col=>{
+      const sorted = sortKey===col[0];
+      return `<th class="${col[2]==='l'?'l':''} ${sorted?'sorted':''}" data-k="${col[0]}">${col[1]}${sorted?` <span class="arw">${sortDir<0?'▼':'▲'}</span>`:''}</th>`;
+    }).join('') + '</tr>';
+
+    let list = rows().slice();
+    const col = c.find(x=>x[0]===sortKey);
+    if (col) list.sort((a,b)=>{ const av=col[4](a), bv=col[4](b); return (av<bv?-1:av>bv?1:0)*sortDir; });
+    else list.sort((a,b)=>n(a.sort_order)-n(b.sort_order));
+
+    if (!list.length){
+      $('tbody').innerHTML = `<tr><td colspan="${c.length}"><div class="empty"><b>${tab==='pitching'?'No pitching stats yet':'Roster & stats coming soon'}</b>Fall 2026 — check back after first pitch.</div></td></tr>`;
+      return;
+    }
+    // leader highlight for the sorted stat
+    const leadVal = col ? Math.max(...list.map(p=>col[4](p))) : null;
+    $('tbody').innerHTML = list.map((p,i)=>'<tr style="animation-delay:'+(i*28)+'ms">' + c.map(x=>{
+      const isLead = col && x[0]===sortKey && x[2]!=='l' && col[4](p)===leadVal && leadVal>0;
+      return `<td class="${x[2]==='l'?'l':''} ${x[2]==='hl'?'hl':''} ${isLead?'lead':''}">${x[3](p)}</td>`;
+    }).join('') + '</tr>').join('');
+  }
+
+  $('thead').addEventListener('click', (e)=>{ const th=e.target.closest('th'); if(!th) return;
+    const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else { sortKey=k; sortDir=-1; } render(); });
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    tab=b.dataset.tab; sortKey=null; sortDir=-1; render();
+  }));
+
+  try {
+    const { data, error } = await sb.from('players').select('*').order('sort_order');
+    if (error) throw error;
+    players = data || [];
+    if (players[0]?.season) $('season').textContent = `Blue Steel Baseball · ${players[0].season}`;
+  } catch (e) { console.error(e); }
+  render();
+</script>
+</body>
+</html>

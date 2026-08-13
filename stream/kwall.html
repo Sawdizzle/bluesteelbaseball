@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blue Steel — K Wall</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://api.fontshare.com" />
+<link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=supreme@400,500,700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --field-deep:#060910; --dugout:#121a29; --chalk:#f2f0e9; --faint:#5f7086;
+    --steel:#7fc0ef; --steel-strong:#a9d8fa; --clay:#c4653b; --clay-bright:#e0794a; --chalk-line:rgba(242,240,233,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:transparent;font-family:'Supreme',sans-serif;color:var(--chalk)}
+  body.bg{background:linear-gradient(120deg,#20303f,#0a121e)}
+
+  #wrap{position:fixed;top:44px;right:44px;display:flex;flex-direction:column;align-items:flex-end;gap:.5rem}
+  #wrap.tl{right:auto;left:44px;align-items:flex-start}
+  #wrap.bl{top:auto;bottom:44px;right:auto;left:44px;align-items:flex-start}
+  #wrap.br{top:auto;bottom:44px}
+  #wrap.hidden{opacity:0}
+
+  .head{display:flex;align-items:center;gap:.5rem;padding:.35rem .7rem;background:rgba(10,14,22,.9);border:1px solid var(--chalk-line);border-radius:7px}
+  .head .dot{width:8px;height:8px;border-radius:50%;background:var(--clay-bright);box-shadow:0 0 10px var(--clay-bright)}
+  .head b{font-family:'Martian Mono',monospace;font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--steel)}
+  .head .n{font-family:'Martian Mono',monospace;font-weight:700;color:var(--chalk);font-size:.72rem}
+
+  .ks{display:flex;gap:.35rem;flex-wrap:wrap;max-width:min(46vw,520px);justify-content:flex-end}
+  #wrap.tl .ks,#wrap.bl .ks{justify-content:flex-start}
+  .kk{width:38px;height:46px;display:grid;place-items:center;font-family:'Tanker','Arial Black',sans-serif;font-size:1.7rem;
+    color:var(--steel-strong);background:rgba(10,14,22,.85);border:1px solid rgba(127,192,239,.55);border-radius:6px;
+    text-shadow:0 0 10px rgba(127,192,239,.8);box-shadow:0 0 14px rgba(127,192,239,.35),inset 0 0 12px rgba(127,192,239,.12)}
+  .kk.pop{animation:kpop .5s cubic-bezier(.2,1.4,.4,1) both}
+  @keyframes kpop{0%{transform:scale(.2) rotate(-25deg);opacity:0}60%{transform:scale(1.25) rotate(6deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+</style>
+</head>
+<body>
+  <div id="wrap" class="hidden">
+    <div class="head"><span class="dot"></span><b>Strikeouts</b><span class="n" id="count">0</span></div>
+    <div class="ks" id="ks"></div>
+  </div>
+
+<script type="module">
+  const q = new URLSearchParams(location.search);
+  const $ = (id) => document.getElementById(id);
+  if (q.has('bg')) document.body.classList.add('bg');
+  if (['tl','bl','br'].includes(q.get('pos'))) $('wrap').classList.add(q.get('pos'));
+
+  let shown = 0, first = true;
+  function render(s){
+    const k = Math.max(0, s.k_count || 0);
+    $('wrap').classList.toggle('hidden', k === 0);
+    $('count').textContent = k;
+    const ks = $('ks');
+    if (k < shown || k === 0){ ks.innerHTML=''; shown=0; }   // reset/lower → rebuild
+    for (let i = shown; i < k; i++){
+      const el = document.createElement('div'); el.className = 'kk';
+      el.textContent = 'K';
+      if (!first) el.classList.add('pop');                     // animate only newly added (not on initial load)
+      ks.appendChild(el);
+    }
+    shown = k; first = false;
+  }
+
+  try {
+    const { getScoreboard, onScoreboard } = await import('./scoreboard-shared.js');
+    render(await getScoreboard());
+    onScoreboard(render);
+  } catch (e) { /* hidden if offline */ }
+</script>
+</body>
+</html>
