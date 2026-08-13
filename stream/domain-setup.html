@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blue Steel — Point bluesteelbaseball.com at Vercel</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://api.fontshare.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=supreme@400,500,700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --field-deep:#060910; --field:#0a0e16; --dugout:#121a29;
+    --chalk:#f2f0e9; --muted:#93a3b8; --faint:#5f7086;
+    --steel:#7fc0ef; --steel-strong:#a9d8fa; --clay:#c4653b; --clay-bright:#e0794a;
+    --win:#8fe3b0; --loss:#ef9c8b; --chalk-line:rgba(242,240,233,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Supreme','Helvetica Neue',Arial,sans-serif;color:var(--chalk);line-height:1.55;
+    background:radial-gradient(60rem 30rem at 82% -12%, rgba(127,192,239,.07), transparent 62%),
+      linear-gradient(180deg,var(--field-deep),#0b1220);min-height:100vh}
+  .wrap{width:min(100% - 2rem, 760px);margin-inline:auto;padding:2.4rem 0 4rem}
+  h1{font-family:'Tanker','Arial Black',sans-serif;font-weight:400;letter-spacing:.05em;text-transform:uppercase;
+    font-size:1.7rem;line-height:1.05}
+  .k{font-family:'Martian Mono',monospace;font-size:.58rem;letter-spacing:.3em;color:var(--faint);text-transform:uppercase}
+  h2{font-family:'Tanker','Arial Black',sans-serif;font-weight:400;letter-spacing:.04em;text-transform:uppercase;
+    font-size:1.15rem;margin-bottom:.2rem}
+  .sub{color:var(--muted);font-size:.95rem;margin:.5rem 0 1.4rem}
+  .card{background:rgba(18,26,41,.5);border:1px solid var(--chalk-line);border-radius:12px;padding:1.2rem 1.3rem;margin-bottom:1.2rem}
+  .card.rec{border-color:rgba(127,192,239,.5);box-shadow:inset 0 0 0 1px rgba(127,192,239,.12)}
+  .tag{display:inline-block;font-family:'Martian Mono',monospace;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;
+    padding:.2rem .5rem;border-radius:5px;margin-bottom:.6rem}
+  .tag.win{background:rgba(143,227,176,.15);color:var(--win);border:1px solid rgba(143,227,176,.4)}
+  .tag.alt{background:rgba(147,163,184,.12);color:var(--muted);border:1px solid var(--chalk-line)}
+  ol{list-style:none;counter-reset:s;margin-top:.6rem}
+  li{counter-increment:s;position:relative;padding:.5rem 0 .5rem 2.2rem;border-top:1px solid var(--chalk-line);font-size:.96rem}
+  li:first-child{border-top:none}
+  li::before{content:counter(s);position:absolute;left:0;top:.5rem;width:1.5rem;height:1.5rem;border-radius:50%;
+    background:rgba(127,192,239,.15);border:1px solid rgba(127,192,239,.4);color:var(--steel-strong);
+    font-family:'Martian Mono',monospace;font-size:.72rem;display:grid;place-items:center}
+  code,.val{font-family:'Martian Mono',monospace;font-size:.86rem;background:rgba(127,192,239,.1);color:var(--steel-strong);
+    padding:.12rem .45rem;border-radius:4px}
+  .val{display:inline-flex;gap:.5rem;align-items:center;margin:.15rem .3rem .15rem 0;background:rgba(10,14,22,.7);
+    border:1px solid var(--chalk-line);padding:.4rem .6rem;font-size:.9rem;color:var(--chalk)}
+  .val b{color:var(--steel-strong)}
+  .rec-table{display:grid;grid-template-columns:auto 1fr;gap:.4rem .9rem;margin:.6rem 0;font-size:.92rem}
+  .rec-table b{color:var(--faint);font-family:'Martian Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;align-self:center}
+  .chk{display:flex;gap:.6rem;align-items:flex-start;padding:.55rem 0;font-size:.96rem;border-top:1px solid var(--chalk-line)}
+  .chk:first-of-type{border-top:none}
+  .box{flex:none;width:18px;height:18px;border:1.5px solid var(--steel);border-radius:4px;margin-top:.15rem}
+  .tip{border-left:3px solid var(--clay-bright);padding:.6rem .9rem;margin:.9rem 0 0;background:rgba(196,101,59,.08);
+    color:var(--chalk);font-size:.9rem;border-radius:0 6px 6px 0}
+  .bad{color:var(--loss)} .good{color:var(--win)}
+  .now{background:rgba(239,156,139,.07);border:1px solid rgba(239,156,139,.3)}
+  .print{float:right;font-family:'Martian Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--chalk);border:1px solid var(--chalk-line);background:rgba(10,14,22,.6);padding:.5rem .8rem;border-radius:6px;cursor:pointer}
+  footer{color:var(--faint);font-size:.78rem;font-family:'Martian Mono',monospace;letter-spacing:.08em;text-align:center;margin-top:1.5rem}
+
+  @media print{
+    body{background:#fff;color:#111}
+    .card{background:#fff;border-color:#bbb;break-inside:avoid}
+    .card.rec{box-shadow:none} .now{background:#fff}
+    h1,h2,.val b{color:#111} .k,.sub,li,.chk{color:#222}
+    code,.val{background:#f1f1f1;color:#111;border-color:#ccc}
+    li::before{background:#eee;border-color:#999;color:#111}
+    .box{border-color:#111} .print,.noprint{display:none}
+    .tip{background:#f6f6f6;color:#111}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <button class="print noprint" onclick="window.print()">⎙ Print</button>
+  <div class="k">Blue Steel Baseball</div>
+  <h1>Point bluesteelbaseball.com at Vercel</h1>
+  <p class="sub">Your site is live on Vercel, but the domain isn’t reaching it. Follow one of the two options below — the first is recommended. Check off each step as you go.</p>
+
+  <div class="card now">
+    <h2>What’s wrong <span class="bad">(the short version)</span></h2>
+    <p style="color:var(--muted);font-size:.95rem;margin-top:.4rem">Your domain is registered at <b>GoDaddy</b>, but its <b>nameservers</b> are set to an old host, <code>ns1/ns2.arvixeshared.com</code> (Arvixe). That host runs your DNS and its account is <b>suspended</b>, so:</p>
+    <ul style="margin:.6rem 0 0 1.1rem;color:var(--muted);font-size:.94rem">
+      <li>The bare domain shows an “Account Suspended” page.</li>
+      <li><b>Editing DNS records in GoDaddy does nothing</b> — GoDaddy isn’t in charge of your DNS; Arvixe is. That’s the confusion.</li>
+      <li><span class="good">www already works</span> because its record points to Vercel.</li>
+    </ul>
+  </div>
+
+  <div class="card rec">
+    <span class="tag win">Recommended · easiest</span>
+    <h2>Option A — Hand your DNS to Vercel</h2>
+    <p style="color:var(--muted);font-size:.93rem">Takes DNS away from the broken Arvixe host. Vercel then sets up the domain automatically — nothing else to maintain.</p>
+    <ol>
+      <li>Sign in at <b>GoDaddy</b> → <b>My Products → Domains → bluesteelbaseball.com → Manage DNS → Nameservers → Change.</b></li>
+      <li>Choose <b>“I’ll use my own nameservers.”</b> Delete the two Arvixe ones and enter Vercel’s:
+        <div style="margin-top:.5rem"><span class="val"><b>NS 1</b> ns1.vercel-dns.com</span><span class="val"><b>NS 2</b> ns2.vercel-dns.com</span></div>
+      </li>
+      <li><b>Save.</b> GoDaddy may warn that changing nameservers replaces existing records — that’s expected and fine.</li>
+      <li>In <b>Vercel</b> → project <b>bluesteelbaseball</b> → <b>Settings → Domains</b>, make sure <code>bluesteelbaseball.com</code> is listed. It flips to a green ✓ once DNS updates.</li>
+      <li>Wait for it to take effect — usually <b>10–60 minutes</b> (can be a few hours). Done.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <span class="tag alt">Alternative · keep GoDaddy DNS</span>
+    <h2>Option B — Set the records at GoDaddy</h2>
+    <p style="color:var(--muted);font-size:.93rem">Use this only if you’d rather keep DNS at GoDaddy instead of Vercel.</p>
+    <ol>
+      <li>GoDaddy → domain → <b>Nameservers → Change → “Use GoDaddy default nameservers.”</b> (This takes control back from Arvixe.)</li>
+      <li>Wait a few minutes, then open <b>DNS Records</b> and set:
+        <div class="rec-table" style="margin-top:.5rem">
+          <b>A</b><span>name <code>@</code> → value <code>216.198.79.1</code> &nbsp;<span style="color:var(--faint)">(delete the old <code>143.95.69.195</code>)</span></span>
+          <b>CNAME</b><span>name <code>www</code> → value <code>cname.vercel-dns.com</code></span>
+        </div>
+      </li>
+      <li>Save. Same green ✓ check in Vercel → Settings → Domains once it propagates.</li>
+    </ol>
+    <p class="tip"><b>The Vercel Domains tab is the source of truth.</b> Whatever it shows for the exact record/value — match that. It turns green when correct.</p>
+  </div>
+
+  <div class="card">
+    <h2>How to know it worked</h2>
+    <div class="chk"><span class="box"></span><span><code>bluesteelbaseball.com</code> loads the site (no “Account Suspended”).</span></div>
+    <div class="chk"><span class="box"></span><span>Vercel → Settings → Domains shows a green ✓ next to the domain.</span></div>
+    <div class="chk"><span class="box"></span><span>Both <code>bluesteelbaseball.com/stream</code> and <code>www.bluesteelbaseball.com/stream</code> open the toolkit.</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Don’t worry about</h2>
+    <div class="chk"><span class="box"></span><span><b>The “Account Suspended” page / paying Arvixe.</b> Once DNS leaves Arvixe, that host is out of the picture — no need to revive or pay it.</span></div>
+    <div class="chk"><span class="box"></span><span><b>Breaking www.</b> It keeps working the whole time.</span></div>
+    <div class="chk"><span class="box"></span><span><b>The overlay links.</b> Keep using <code>bluesteelbaseball.vercel.app</code> until the domain is green — those always work.</span></div>
+  </div>
+
+  <footer>Blue Steel Baseball · domain setup · vercel + godaddy</footer>
+</div>
+</body>
+</html>

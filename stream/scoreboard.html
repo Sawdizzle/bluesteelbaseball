@@ -154,6 +154,85 @@
     13%{opacity:1;transform:translate(-50%,0) scale(1)}
     82%{opacity:1;transform:translate(-50%,0) scale(1)}
     100%{opacity:0;transform:translate(-50%,-12px) scale(1)}}
+
+  /* ============================================================
+     SCOREBOARD STYLES — set via [data-style] on #anchor
+     classic = default (rules above). minimal / chalk / neon / jumbotron below.
+     ============================================================ */
+
+  /* ---- MINIMAL: clean, understated, low-key ---- */
+  #anchor[data-style="minimal"] #bug{background:rgba(6,9,16,.64);border:none;clip-path:none;border-radius:11px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4)}
+  #anchor[data-style="minimal"] .sep{opacity:.35}
+  #anchor[data-style="minimal"] .tscore{background:none;border:none}
+  #anchor[data-style="minimal"] .chip{border-radius:50%;background:rgba(242,240,233,.05)}
+  #anchor[data-style="minimal"] .team.accent .chip{background:rgba(127,192,239,.18)}
+  #anchor[data-style="minimal"] .base{border-radius:2px}
+
+  /* ---- CHALK: sandlot chalkboard, dashed hand-drawn ---- */
+  #anchor[data-style="chalk"] #bug{background:linear-gradient(180deg,#153029,#0e231e);
+    border:1px solid rgba(242,240,233,.3);clip-path:none;border-radius:5px;
+    box-shadow:0 12px 30px rgba(0,0,0,.5),inset 0 0 46px rgba(0,0,0,.35)}
+  #anchor[data-style="chalk"] .tname,#anchor[data-style="chalk"] .tscore,
+  #anchor[data-style="chalk"] .inning .num,#anchor[data-style="chalk"] .clabel{
+    color:#f4f2ea;font-family:'Tanker','Arial Black',sans-serif;text-shadow:0 0 1px rgba(244,242,234,.6)}
+  #anchor[data-style="chalk"] .team.accent .tname{color:#fff}
+  #anchor[data-style="chalk"] .inning .arw{color:#f4f2ea}
+  #anchor[data-style="chalk"] .tscore{background:transparent;border:1px dashed rgba(244,242,234,.55)}
+  #anchor[data-style="chalk"] .chip{background:transparent;border:1px dashed rgba(244,242,234,.45)}
+  #anchor[data-style="chalk"] .sep{background:rgba(244,242,234,.28)}
+  #anchor[data-style="chalk"] .base{background:transparent;border:1.5px dashed rgba(244,242,234,.55);box-shadow:none}
+  #anchor[data-style="chalk"] .base.on{background:rgba(244,242,234,.9);border-style:solid;border-color:#fff;box-shadow:none}
+  #anchor[data-style="chalk"] .odot{background:transparent;border:1.5px dashed rgba(244,242,234,.5)}
+  #anchor[data-style="chalk"] .odot.on{background:#f4f2ea;border-color:#fff;box-shadow:none}
+  #anchor[data-style="chalk"] .pip{background:transparent;border:1px dashed rgba(244,242,234,.45)}
+  #anchor[data-style="chalk"] .pip.on{background:#f4f2ea!important;border-color:#fff!important;box-shadow:none!important}
+
+  /* ---- NEON: glowing tubes, animated, over-the-top ---- */
+  #anchor[data-style="neon"] #bug{background:rgba(3,5,11,.9);border:1.5px solid rgba(127,192,239,.9);
+    clip-path:none;border-radius:12px;position:relative;overflow:hidden;
+    animation:neonPulse 2.6s ease-in-out infinite}
+  @keyframes neonPulse{
+    0%,100%{box-shadow:0 0 20px rgba(127,192,239,.5),inset 0 0 16px rgba(127,192,239,.16),0 0 55px rgba(127,192,239,.25);border-color:rgba(127,192,239,.9)}
+    50%{box-shadow:0 0 34px rgba(224,121,74,.55),inset 0 0 22px rgba(127,192,239,.24),0 0 85px rgba(127,192,239,.4);border-color:rgba(169,216,250,1)}}
+  #anchor[data-style="neon"] #bug::after{content:"";position:absolute;left:0;right:0;height:40%;top:0;pointer-events:none;
+    background:linear-gradient(rgba(169,216,250,.14),transparent);mix-blend-mode:screen;animation:neonScan 3.4s linear infinite}
+  @keyframes neonScan{0%{transform:translateY(-110%)}100%{transform:translateY(320%)}}
+  #anchor[data-style="neon"] .tname{color:#eaf6ff;text-shadow:0 0 8px rgba(127,192,239,.9),0 0 18px rgba(127,192,239,.55)}
+  #anchor[data-style="neon"] .team.accent .tname{color:#d4efff;text-shadow:0 0 10px rgba(169,216,250,1),0 0 22px rgba(127,192,239,.7)}
+  #anchor[data-style="neon"] .tscore{background:rgba(0,0,0,.45);border:1px solid rgba(127,192,239,.7);color:#fff;
+    text-shadow:0 0 10px rgba(127,192,239,.9)}
+  #anchor[data-style="neon"] .inning .num,#anchor[data-style="neon"] .inning .arw{text-shadow:0 0 10px currentColor,0 0 20px currentColor}
+  #anchor[data-style="neon"] .base{border-color:rgba(127,192,239,.5)}
+  #anchor[data-style="neon"] .base.on{box-shadow:0 0 16px var(--clay-bright),0 0 30px rgba(224,121,74,.65)}
+  #anchor[data-style="neon"] .odot.on{box-shadow:0 0 14px var(--clay-bright),0 0 24px rgba(224,121,74,.6)}
+  #anchor[data-style="neon"] .pip.on.ball{box-shadow:0 0 12px var(--steel),0 0 20px rgba(127,192,239,.7)}
+  #anchor[data-style="neon"] .pip.on.strike{box-shadow:0 0 12px var(--clay-bright),0 0 20px rgba(224,121,74,.7)}
+
+  /* ---- JUMBOTRON: retro stadium LED, amber dot-matrix ---- */
+  #anchor[data-style="jumbotron"] #bug{background:#0a0b06;border:3px solid #1b1910;clip-path:none;border-radius:8px;
+    position:relative;overflow:hidden;box-shadow:0 14px 42px rgba(0,0,0,.6),inset 0 0 34px rgba(0,0,0,.85)}
+  #anchor[data-style="jumbotron"] .tname,#anchor[data-style="jumbotron"] .tscore,
+  #anchor[data-style="jumbotron"] .inning .num,#anchor[data-style="jumbotron"] .clabel{
+    font-family:'Martian Mono',monospace!important;color:#ffb028;text-shadow:0 0 6px rgba(255,176,40,.85),0 0 14px rgba(255,130,0,.5)}
+  #anchor[data-style="jumbotron"] .tname{font-size:1.02rem;letter-spacing:.02em;max-width:168px}
+  #anchor[data-style="jumbotron"] .team.accent .tname{color:#ffd888}
+  #anchor[data-style="jumbotron"] .teams{min-width:250px}
+  #anchor[data-style="jumbotron"] .tscore{background:rgba(0,0,0,.55);border:1px solid rgba(255,176,40,.35)}
+  #anchor[data-style="jumbotron"] .inning .arw{color:#79f56a;text-shadow:0 0 8px rgba(121,245,106,.85)}
+  #anchor[data-style="jumbotron"] .sep{background:rgba(255,176,40,.22)}
+  #anchor[data-style="jumbotron"] .base{border-color:rgba(255,176,40,.3);background:rgba(255,176,40,.05)}
+  #anchor[data-style="jumbotron"] .base.on{background:linear-gradient(135deg,#ffd888,#ffb028);border-color:#ffb028;
+    box-shadow:0 0 14px rgba(255,176,40,.85)}
+  #anchor[data-style="jumbotron"] .odot.on{background:#ff5a3c;border-color:#ff5a3c;box-shadow:0 0 12px #ff5a3c}
+  #anchor[data-style="jumbotron"] .pip.on.ball{background:#79f56a!important;border-color:#79f56a!important;box-shadow:0 0 9px #79f56a!important}
+  #anchor[data-style="jumbotron"] .pip.on.strike{background:#ff5a3c!important;border-color:#ff5a3c!important;box-shadow:0 0 9px #ff5a3c!important}
+  /* LED dot texture + rolling scanlines */
+  #anchor[data-style="jumbotron"] #bug::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
+    background:radial-gradient(rgba(0,0,0,.4) 40%, transparent 42%);background-size:3px 3px;mix-blend-mode:multiply}
+  #anchor[data-style="jumbotron"] #bug::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
+    background:repeating-linear-gradient(rgba(0,0,0,0) 0 2px, rgba(0,0,0,.16) 2px 3px);animation:jumboFlicker 5s steps(40) infinite}
+  @keyframes jumboFlicker{0%,100%{opacity:.55}45%{opacity:.72}55%{opacity:.5}92%{opacity:.68}96%{opacity:.42}}
 </style>
 </head>
 <body>
@@ -202,6 +281,9 @@
   if (q.has('bg')) document.body.classList.add('bg');
   const scale = parseFloat(q.get('scale'));
   if (scale > 0) anchor.style.transform = `scale(${scale})`;
+  const STYLES = ['classic','minimal','chalk','neon','jumbotron'];
+  const forcedStyle = STYLES.includes(q.get('style')) ? q.get('style') : null;
+  anchor.dataset.style = forcedStyle || 'classic';
 
   const $ = (id) => document.getElementById(id);
   const bug = $('bug');
@@ -333,6 +415,9 @@
 
   function render(s, animate) {
     const prev = cur || {};
+
+    // scoreboard style (phone-switchable; ?style= forces one for testing)
+    anchor.dataset.style = forcedStyle || (STYLES.includes(s.style) ? s.style : 'classic');
 
     // teams
     setText($('away-name'), s.away_name, false);

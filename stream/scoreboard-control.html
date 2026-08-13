@@ -141,6 +141,7 @@
   .fxbtn.steel{background:linear-gradient(180deg,rgba(127,192,239,.22),rgba(127,192,239,.06));border-color:rgba(127,192,239,.45);color:var(--steel-strong)}
   .fxbtn.clay{background:linear-gradient(180deg,rgba(224,121,74,.2),rgba(224,121,74,.05));border-color:rgba(224,121,74,.5);color:var(--clay-bright)}
   .fxbtn:active{transform:scale(.95)}
+  .stylebtn.on{background:linear-gradient(180deg,rgba(127,192,239,.28),rgba(127,192,239,.08));border-color:var(--steel);color:var(--steel-strong)}
   /* editable team-name field in the Teams card */
   .pname-input{width:100%;font-family:'Tanker','Arial Black',sans-serif;text-transform:uppercase;letter-spacing:.04em;
     font-size:.98rem;color:var(--chalk);background:rgba(242,240,233,.05);border:1px solid var(--chalk-line);
@@ -259,6 +260,18 @@
       </div>
     </div>
 
+    <!-- scoreboard style -->
+    <div class="card">
+      <h2>Scoreboard style</h2>
+      <div class="fxmini" style="grid-template-columns:repeat(3,1fr)">
+        <button class="fxbtn stylebtn" data-style="classic">Classic</button>
+        <button class="fxbtn stylebtn" data-style="minimal">Minimal</button>
+        <button class="fxbtn stylebtn" data-style="chalk">Chalk</button>
+        <button class="fxbtn stylebtn" data-style="neon">Neon</button>
+        <button class="fxbtn stylebtn" data-style="jumbotron">Jumbotron</button>
+      </div>
+    </div>
+
     <!-- banner -->
     <div class="card">
       <h2>Banner</h2>
@@ -325,7 +338,7 @@
   // Local mirror of server state.
   let S = { away_name:'Away', home_name:'Blue Steel', away_score:0, home_score:0,
     inning:1, half:'top', balls:0, strikes:0, outs:0,
-    base1:false, base2:false, base3:false, accent_side:'home', status:null, visible:true };
+    base1:false, base2:false, base3:false, accent_side:'home', status:null, visible:true, style:'classic' };
 
   let toastT;
   function toast(msg, err){ const t=$('toast'); t.textContent=msg; t.className='toast show'+(err?' err':''); clearTimeout(toastT); toastT=setTimeout(()=>t.className='toast',1400); }
@@ -471,6 +484,8 @@
     // accent toggle
     $('acc-away').classList.toggle('on', S.accent_side==='away');
     $('acc-home').classList.toggle('on', S.accent_side==='home');
+    // scoreboard style
+    document.querySelectorAll('.stylebtn').forEach(b=>b.classList.toggle('on', b.dataset.style===S.style));
     // status field
     if(document.activeElement!==$('status')) $('status').value=S.status||'';
     // overlay visibility toggle
@@ -549,6 +564,9 @@
 
   // accent
   document.querySelectorAll('[data-accent]').forEach(b=>b.addEventListener('click',()=>push({ accent_side:b.dataset.accent })));
+
+  // scoreboard style
+  document.querySelectorAll('.stylebtn').forEach(b=>b.addEventListener('click',()=>push({ style:b.dataset.style })));
 
   // overlay visibility toggle
   $('hidebtn').addEventListener('click', ()=>push({ visible: !S.visible }));
