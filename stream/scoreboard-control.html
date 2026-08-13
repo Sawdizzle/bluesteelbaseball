@@ -54,7 +54,7 @@
   .tcard.accent{border-color:rgba(127,192,239,.5);box-shadow:inset 0 0 0 1px rgba(127,192,239,.18)}
   .tcard .name{width:100%;text-align:center;font-family:'Tanker','Arial Black',sans-serif;letter-spacing:.04em;
     text-transform:uppercase;font-size:1rem;color:var(--chalk);background:transparent;border:none;
-    border-bottom:1px dashed transparent;padding:.15rem 0}
+    border-bottom:1px dashed var(--chalk-line);padding:.15rem 0}
   .tcard .name:focus{outline:none;border-bottom-color:var(--steel)}
   .tcard.accent .name{color:var(--steel-strong)}
   .bat-tag{font-family:'Martian Mono',monospace;font-size:.5rem;letter-spacing:.18em;color:var(--clay-bright);
@@ -132,6 +132,19 @@
   .btn.tiny{min-height:40px;font-size:.66rem;padding:0 .9rem;flex:0 0 auto;display:inline-flex;
     align-items:center;justify-content:center}
   label.btn{cursor:pointer}
+  /* compact big-play buttons */
+  .fxmini{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}
+  .fxbtn{min-height:40px;font-family:'Martian Mono',monospace;font-weight:700;font-size:.72rem;
+    letter-spacing:.03em;text-transform:uppercase;background:rgba(242,240,233,.05);
+    border:1px solid var(--chalk-line);color:var(--chalk);border-radius:8px;padding:0 .2rem}
+  .fxbtn.steel{background:linear-gradient(180deg,rgba(127,192,239,.22),rgba(127,192,239,.06));border-color:rgba(127,192,239,.45);color:var(--steel-strong)}
+  .fxbtn.clay{background:linear-gradient(180deg,rgba(224,121,74,.2),rgba(224,121,74,.05));border-color:rgba(224,121,74,.5);color:var(--clay-bright)}
+  .fxbtn:active{transform:scale(.95)}
+  /* editable team-name field in the Teams card */
+  .pname-input{width:100%;font-family:'Tanker','Arial Black',sans-serif;text-transform:uppercase;letter-spacing:.04em;
+    font-size:.98rem;color:var(--chalk);background:rgba(242,240,233,.05);border:1px solid var(--chalk-line);
+    border-radius:7px;padding:.5rem .6rem;margin-bottom:.45rem}
+  .pname-input:focus{outline:none;border-color:var(--steel)}
 </style>
 </head>
 <body>
@@ -187,32 +200,6 @@
       </div>
     </div>
 
-    <!-- big plays -->
-    <div class="card">
-      <h2>Big plays — animation + sound</h2>
-      <div class="grouplab">Hits</div>
-      <div class="fxgrid">
-        <button class="btn primary big" id="fx-hr">Home Run</button>
-        <button class="btn big" id="fx-3b">Triple</button>
-        <button class="btn big" id="fx-2b">Double</button>
-        <button class="btn big" id="fx-1b">Base Hit</button>
-      </div>
-      <div class="grouplab">On base &amp; scoring</div>
-      <div class="fxgrid">
-        <button class="btn primary big" id="fx-run">Run Scores</button>
-        <button class="btn big" id="fx-sb">Stolen Base</button>
-        <button class="btn big" id="fx-bb">Walk / BB</button>
-        <button class="btn big" id="fx-hbp">HBP</button>
-      </div>
-      <div class="grouplab">Outs</div>
-      <div class="fxgrid">
-        <button class="btn clay big" id="fx-k">Strikeout</button>
-        <button class="btn clay big" id="fx-out">Out</button>
-        <button class="btn clay big" id="fx-dp">Double Play</button>
-      </div>
-      <p class="minihint">Each plays an animation + sound on the overlay and updates the score, bases &amp; outs. HR clears the bases and scores every runner (Grand Slam when loaded). Sound comes out of the OBS browser source — add <code>?mute=1</code> to the overlay URL to silence it.</p>
-    </div>
-
     <!-- count -->
     <div class="card">
       <h2>Count</h2>
@@ -246,6 +233,24 @@
       </div>
     </div>
 
+    <!-- big plays (compact) -->
+    <div class="card">
+      <h2>Big plays — animation + sound</h2>
+      <div class="fxmini">
+        <button class="fxbtn steel" id="fx-hr">HR</button>
+        <button class="fxbtn" id="fx-3b">Triple</button>
+        <button class="fxbtn" id="fx-2b">Double</button>
+        <button class="fxbtn" id="fx-1b">Single</button>
+        <button class="fxbtn steel" id="fx-run">Run</button>
+        <button class="fxbtn" id="fx-sb">Steal</button>
+        <button class="fxbtn" id="fx-bb">Walk</button>
+        <button class="fxbtn" id="fx-hbp">HBP</button>
+        <button class="fxbtn clay" id="fx-k">K</button>
+        <button class="fxbtn clay" id="fx-out">Out</button>
+        <button class="fxbtn clay" id="fx-dp">DP</button>
+      </div>
+    </div>
+
     <!-- status + setup -->
     <div class="card">
       <h2>Banner &amp; setup</h2>
@@ -267,13 +272,13 @@
       </div>
     </div>
 
-    <!-- team photos -->
+    <!-- teams: names + photos -->
     <div class="card">
-      <h2>Team photos</h2>
+      <h2>Teams — names &amp; photos</h2>
       <div class="photo">
         <div class="thumb" id="thumb-away"></div>
         <div class="pcol">
-          <div class="pname" id="pn-away">Away</div>
+          <input class="pname-input" id="tn-away" placeholder="Opponent name" maxlength="18" />
           <div class="prow">
             <label class="btn tiny"><input type="file" accept="image/*" id="file-away" hidden />Upload photo</label>
             <button class="btn tiny" id="clear-away">Clear</button>
@@ -283,14 +288,14 @@
       <div class="photo" style="margin-top:.65rem">
         <div class="thumb" id="thumb-home"></div>
         <div class="pcol">
-          <div class="pname" id="pn-home">Blue Steel</div>
+          <input class="pname-input" id="tn-home" placeholder="Your team name" maxlength="18" />
           <div class="prow">
             <label class="btn tiny"><input type="file" accept="image/*" id="file-home" hidden />Upload photo</label>
             <button class="btn tiny" id="clear-home">Clear</button>
           </div>
         </div>
       </div>
-      <p class="minihint">Pick from your camera roll — photos are shrunk to a small logo automatically. Clear reverts to the skull (your team) or the opponent’s initial.</p>
+      <p class="minihint">Type the opponent’s name to match who you’re playing. Photos are shrunk to a small logo automatically; Clear reverts to the skull (your team) or the initial.</p>
     </div>
 
     <div class="actions" style="margin-top:.2rem">
@@ -439,7 +444,8 @@
     if(document.activeElement!==$('n-home')) $('n-home').value=S.home_name;
     // team photos
     setThumb('away', S.away_logo, S.away_name); setThumb('home', S.home_logo, S.home_name);
-    $('pn-away').textContent=S.away_name; $('pn-home').textContent=S.home_name;
+    if(document.activeElement!==$('tn-away')) $('tn-away').value=S.away_name;
+    if(document.activeElement!==$('tn-home')) $('tn-home').value=S.home_name;
     $('c-away').classList.toggle('accent', S.accent_side==='away');
     $('c-home').classList.toggle('accent', S.accent_side==='home');
     $('c-away').classList.toggle('batting', S.half==='top');
@@ -519,12 +525,13 @@
   $('newhalf').addEventListener('click', ()=>push(nextHalf()));
   $('clearcount').addEventListener('click', ()=>push({ balls:0, strikes:0, outs:0 }));
 
-  // names (debounced)
+  // names (debounced) — score-card inputs and the Teams-card inputs both edit the same names
   let nameT;
-  ['n-away','n-home'].forEach(id=>{
-    const key = id==='n-away' ? 'away_name' : 'home_name';
-    $(id).addEventListener('input', ()=>{ clearTimeout(nameT); nameT=setTimeout(()=>push({ [key]: $(id).value.trim() || (key==='home_name'?'Blue Steel':'Away') }), 500); });
-    $(id).addEventListener('blur', ()=>{ clearTimeout(nameT); push({ [key]: $(id).value.trim() || (key==='home_name'?'Blue Steel':'Away') }); });
+  [['n-away','away_name'],['n-home','home_name'],['tn-away','away_name'],['tn-home','home_name']].forEach(([id,key])=>{
+    const el=$(id); if(!el) return;
+    const fallback = key==='home_name' ? 'Blue Steel' : 'Away';
+    el.addEventListener('input', ()=>{ clearTimeout(nameT); nameT=setTimeout(()=>push({ [key]: el.value.trim() || fallback }), 500); });
+    el.addEventListener('blur', ()=>{ clearTimeout(nameT); push({ [key]: el.value.trim() || fallback }); });
   });
 
   // status
