@@ -5,12 +5,26 @@ export const SUPABASE_KEY = 'sb_publishable_SLM96UPQ3Rgrf6MTpXRZUQ_LklkFhPH'; //
 export const YT_CHANNEL_URL = 'https://www.youtube.com/@BlueSteelBaseball';
 export const YT_UPLOADS_PLAYLIST = 'UUFb6_Nt_4asM-syOSy81AZg';
 
-// GameChanger has no public API, but your team has one shareable "GameStream"
-// link that stays the same across every game — fans bookmark it to follow live
-// scores (and video). To get it: open web.gc.com, sign in, go to your team, and
-// copy the team URL from the address bar. Paste it below. Leave '' to hide the
-// "Follow live on GameChanger" button everywhere.
-export const GC_TEAM_URL = 'https://web.gc.com/teams/VIemcjQNJ8sO';
+// GameChanger has no public API, but each team publishes two shareable things:
+//   teamUrl  — the "GameStream" link fans bookmark to follow live scores/video.
+//              Open web.gc.com, sign in, pick the team, copy the address bar.
+//   widgetId — the UUID behind an embeddable schedule widget. In GameChanger:
+//              team → Settings → Website Widget → Schedule → copy the id out of
+//              the embed snippet (it looks like 27f4e868-6c00-...). Leave it ''
+//              and the site links out to that team's GameChanger page instead
+//              of embedding the schedule.
+export const GC_TEAMS = [
+  {
+    label: '11U',
+    teamUrl: 'https://web.gc.com/teams/f5WaU1uVswZQ',
+    widgetId: '',
+  },
+  {
+    label: '14U',
+    teamUrl: 'https://web.gc.com/teams/VIemcjQNJ8sO',
+    widgetId: '27f4e868-6c00-4dc2-8b36-641c3b631e7f',
+  },
+];
 
 export const SOCIALS = [
   { name: 'Facebook', url: 'https://www.facebook.com/BlueSteelBaseball/' },

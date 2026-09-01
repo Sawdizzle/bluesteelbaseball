@@ -247,6 +247,13 @@ h3 { font-size: var(--text-lg); letter-spacing: 0.04em; }
   display: block; padding: 1.4rem 0.4rem; color: var(--faint); font-size: var(--text-sm);
 }
 
+/* One schedule embed per team, side by side until the columns get cramped. */
+.gc-teams { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem; align-items: start; }
+.gc-team__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 0.6rem; }
+.gc-team__head h3 { margin: 0; }
+.gc-team__head a { color: var(--steel); font-size: var(--text-sm); }
+.gc-embed .empty { padding: 1.2rem 0.4rem; }
+
 /* ---------- watch + gallery ---------- */
 .video-frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #000; box-shadow: 0 0 0 1px var(--chalk-line); }
 .video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
@@ -285,7 +292,7 @@ h3 { font-size: var(--text-lg); letter-spacing: 0.04em; }
   .hero-diamond { right: -34%; opacity: 0.55; }
   .board-rail { grid-template-columns: 1fr; }
   .board-cell + .board-cell { border-left: 0; border-top: 1px dashed var(--chalk-line); }
-  .teams-grid, .contact-grid { grid-template-columns: 1fr; }
+  .teams-grid, .contact-grid, .gc-teams { grid-template-columns: 1fr; }
   .pillars { grid-template-columns: 1fr; gap: 1.4rem; }
 }
 @media (max-width: 760px) {

@@ -1,7 +1,7 @@
 {
   "name": "Blue Steel Baseball",
   "short_name": "Blue Steel",
-  "description": "Select baseball in Sanger, TX — schedules, scores, live streams, and highlights for our 10U and 14U teams.",
+  "description": "Select baseball in Sanger, TX — schedules, scores, live streams, and highlights for our 11U and 14U teams.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

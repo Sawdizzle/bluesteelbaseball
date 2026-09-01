@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#060910" />
   <title>Schedule &amp; Results — Blue Steel Baseball</title>
-  <meta name="description" content="Game schedule, scores, and results for Blue Steel Baseball's 10U and 14U teams." />
+  <meta name="description" content="Game schedule, scores, and results for Blue Steel Baseball's 11U and 14U teams." />
   <link rel="canonical" href="https://bluesteelbaseball.com/schedule" />
   <meta property="og:title" content="Schedule & Results — Blue Steel Baseball" />
-  <meta property="og:description" content="Game schedule, scores, and results for Blue Steel Baseball's 10U and 14U teams." />
+  <meta property="og:description" content="Game schedule, scores, and results for Blue Steel Baseball's 11U and 14U teams." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://bluesteelbaseball.com/schedule" />
   <meta property="og:site_name" content="Blue Steel Baseball" />
@@ -57,7 +57,7 @@
           <h2>Schedule &amp; results</h2>
           <p>Live from GameChanger — game times, results, and scores update automatically as we play.</p>
         </div>
-        <div id="gc-schedule" class="gc-embed plate"></div>
+        <div id="gc-schedule" class="gc-teams"></div>
       </div>
     </section>
   </main>
@@ -75,12 +75,10 @@
 
   <script type="module">
     import { mountNav, mountAnnouncement } from '/js/data.js';
+    import { mountSchedules } from '/js/gc.js';
     mountNav();
     mountAnnouncement();
+    mountSchedules('#gc-schedule', { maxGames: 8 });
   </script>
-
-  <!-- GameChanger live schedule widget -->
-  <script src="https://widgets.gc.com/static/js/sdk.v1.js"
-          onload="GC.team.schedule.init({ target: '#gc-schedule', widgetId: '27f4e868-6c00-4dc2-8b36-641c3b631e7f', maxVerticalGamesVisible: 8 })"></script>
 </body>
 </html>

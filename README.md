@@ -1,6 +1,6 @@
 # Blue Steel Baseball — bluesteelbaseball.com
 
-Team website for Blue Steel Baseball, a select program in Sanger, TX fielding 10U and 14U teams.
+Team website for Blue Steel Baseball, a select program in Sanger, TX fielding 11U and 14U teams.
 
 Static multi-page site — no build step, no framework, no dependencies to install. Push to `main` and Vercel deploys it as-is.
 

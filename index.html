@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#060910" />
   <title>Blue Steel Baseball — Sanger, TX</title>
-  <meta name="description" content="Blue Steel Baseball is a competitive, development-focused select program in Sanger, Texas fielding 10U and 14U teams. Schedules, scores, live streams, and highlights." />
+  <meta name="description" content="Blue Steel Baseball is a competitive, development-focused select program in Sanger, Texas fielding 11U and 14U teams. Schedules, scores, live streams, and highlights." />
   <link rel="canonical" href="https://bluesteelbaseball.com/" />
   <meta property="og:title" content="Blue Steel Baseball" />
-  <meta property="og:description" content="Select baseball in Sanger, TX — schedules, scores, live streams, and highlights for our 10U and 14U teams." />
+  <meta property="og:description" content="Select baseball in Sanger, TX — schedules, scores, live streams, and highlights for our 11U and 14U teams." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://bluesteelbaseball.com/" />
   <meta property="og:site_name" content="Blue Steel Baseball" />
   <meta property="og:image" content="https://bluesteelbaseball.com/assets/og.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Blue Steel Baseball" />
-  <meta name="twitter:description" content="Select baseball in Sanger, TX — schedules, scores, live streams, and highlights for our 10U and 14U teams." />
+  <meta name="twitter:description" content="Select baseball in Sanger, TX — schedules, scores, live streams, and highlights for our 11U and 14U teams." />
   <meta name="twitter:image" content="https://bluesteelbaseball.com/assets/og.jpg" />
   <link rel="icon" href="/assets/favicon.ico" />
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
@@ -28,7 +28,7 @@
     "sport": "Baseball",
     "url": "https://bluesteelbaseball.com/",
     "logo": "https://bluesteelbaseball.com/assets/icon-512.png",
-    "description": "A competitive, development-focused select baseball program fielding 10U and 14U teams.",
+    "description": "A competitive, development-focused select baseball program fielding 11U and 14U teams.",
     "email": "bluesteelbaseball@gmail.com",
     "location": {
       "@type": "Place",
@@ -95,13 +95,13 @@
           <span class="eyebrow">Select Baseball · Sanger, Texas</span>
           <h1>Built like<br /><span class="steel-word">steel.</span></h1>
           <p class="hero-tagline">Play with purpose.</p>
-          <p>A competitive, development-focused program fielding 10U and 14U teams. Every game streamed. Every score posted. Every family in the loop.</p>
+          <p>A competitive, development-focused program fielding 11U and 14U teams. Every game streamed. Every score posted. Every family in the loop.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="/schedule">See the schedule</a>
             <a class="button button-secondary" href="/watch">Watch us play</a>
           </div>
           <div class="hero-meta">
-            <span>10U &amp; 14U</span>
+            <span>11U &amp; 14U</span>
             <span>Season one</span>
             <span>North Texas</span>
           </div>
@@ -117,7 +117,7 @@
           <h2>Next up</h2>
           <p>Straight from GameChanger — scores update live as we play. <a href="/schedule" style="color: var(--steel);">Full schedule &amp; results →</a></p>
         </div>
-        <div id="gc-home" class="gc-embed plate"></div>
+        <div id="gc-home" class="gc-teams"></div>
       </div>
     </section>
 
@@ -130,7 +130,7 @@
           <p>Coachable players, strong work ethic, and families committed to long-term growth.</p>
         </div>
         <div class="teams-grid" id="teams-grid">
-          <article class="team-card plate"><div class="age">10<small>U</small></div><p>Loading…</p></article>
+          <article class="team-card plate"><div class="age">11<small>U</small></div><p>Loading…</p></article>
           <article class="team-card plate"><div class="age">14<small>U</small></div><p>Loading…</p></article>
         </div>
       </div>
@@ -199,10 +199,12 @@
 
   <script type="module">
     import { mountNav, mountAnnouncement, getTeams, esc } from '/js/data.js';
+    import { mountSchedules } from '/js/gc.js';
     import { SOCIALS } from '/js/config.js';
 
     mountNav();
     mountAnnouncement();
+    mountSchedules('#gc-home', { maxGames: 3 });
 
     document.getElementById('social-row').innerHTML = SOCIALS
       .map(s => `<a class="button button-secondary" href="${s.url}" target="_blank" rel="noopener noreferrer">${s.name}</a>`)
@@ -225,8 +227,5 @@
     })();
   </script>
 
-  <!-- GameChanger live schedule widget (compact) -->
-  <script src="https://widgets.gc.com/static/js/sdk.v1.js"
-          onload="GC.team.schedule.init({ target: '#gc-home', widgetId: '27f4e868-6c00-4dc2-8b36-641c3b631e7f', maxVerticalGamesVisible: 3 })"></script>
 </body>
 </html>
