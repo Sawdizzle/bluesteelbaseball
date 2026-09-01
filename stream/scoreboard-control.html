@@ -164,12 +164,16 @@
   .countbar .crow{margin-bottom:0}
   /* collapsible setup */
   details.setup{padding:0;overflow:hidden}
+  /* NOTE: never set `display` on the summary itself — iOS Safari stops toggling
+     the <details> when summary isn't display:list-item. Flex lives on .srow. */
   details.setup>summary{list-style:none;cursor:pointer;padding:.95rem;font-family:'Martian Mono',monospace;
     font-size:.62rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;
-    display:flex;align-items:center;justify-content:space-between}
+    -webkit-tap-highlight-color:transparent}
   details.setup>summary::-webkit-details-marker{display:none}
-  details.setup>summary::after{content:'▸';color:var(--faint);font-size:.8rem}
-  details.setup[open]>summary::after{content:'▾'}
+  details.setup>summary::marker{content:''}
+  details.setup>summary .srow{display:flex;align-items:center;justify-content:space-between}
+  details.setup>summary .srow::after{content:'▸';color:var(--faint);font-size:.8rem}
+  details.setup[open]>summary .srow::after{content:'▾'}
   details.setup>summary:hover{color:var(--chalk)}
   .setup-body{padding:0 .95rem 1.05rem}
   .grouplab2{font-family:'Martian Mono',monospace;font-size:.56rem;letter-spacing:.2em;color:var(--faint);
@@ -385,7 +389,7 @@
 
     <!-- setup (collapsed until needed) -->
     <details class="card setup">
-      <summary>Game setup — teams &amp; options</summary>
+      <summary><span class="srow">Game setup — teams &amp; options</span></summary>
       <div class="setup-body">
         <div class="grouplab2">Teams — names &amp; photos</div>
         <div class="photo">
