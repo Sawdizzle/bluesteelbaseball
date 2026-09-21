@@ -736,7 +736,13 @@
     const a=((+p.h||0)/ab).toFixed(3).replace(/^0/,''); const bits=[a+' AVG'];
     if(+p.hr) bits.push(p.hr+' HR'); if(+p.rbi) bits.push(p.rbi+' RBI'); return bits.join(' · '); }
   function fillRoster(){
-    const opts='<option value="">Pick from roster…</option>'+PLAYERS.map((p,i)=>`<option value="${i}">${p.number?('#'+p.number+' '):''}${p.name}</option>`).join('');
+    const opt=(p)=>`<option value="${PLAYERS.indexOf(p)}">${p.number?('#'+p.number+' '):''}${p.name}</option>`;
+    // group by team when more than one team has players
+    const groups=[...new Set(PLAYERS.map(p=>p.team?.name||''))];
+    const body=groups.length>1
+      ? groups.map(g=>`<optgroup label="${g||'Other'}">${PLAYERS.filter(p=>(p.team?.name||'')===g).map(opt).join('')}</optgroup>`).join('')
+      : PLAYERS.map(opt).join('');
+    const opts='<option value="">Pick from roster…</option>'+body;
     $('b-pick').innerHTML=opts; $('sp-pick').innerHTML=opts;
   }
   $('b-pick').addEventListener('change', e=>{ const p=PLAYERS[e.target.value]; if(!p) return;

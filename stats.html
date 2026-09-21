@@ -28,6 +28,8 @@
   h1{font-family:'Tanker','Arial Black',sans-serif;font-weight:400;letter-spacing:.06em;text-transform:uppercase;font-size:1.7rem;line-height:1}
   .k{font-family:'Martian Mono',monospace;font-size:.58rem;letter-spacing:.3em;color:var(--faint);text-transform:uppercase;margin-top:.3rem}
   .tabs{display:flex;gap:.5rem;margin:1.4rem 0 1rem;flex-wrap:wrap}
+  #teams{margin-bottom:0}
+  #teams:empty{display:none}
   .tab{font-family:'Martian Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;
     padding:.55rem 1rem;border:1px solid var(--chalk-line);background:rgba(10,14,22,.6);color:var(--muted);cursor:pointer;border-radius:7px}
   .tab.on{border-color:var(--steel);color:var(--steel-strong);background:rgba(127,192,239,.1)}
@@ -76,7 +78,8 @@
     <div><h1>Team Stats</h1><div class="k" id="season">Blue Steel Baseball · Fall 2026</div></div>
   </header>
 
-  <div class="tabs">
+  <div class="tabs" id="teams" role="group" aria-label="Team"></div>
+  <div class="tabs" id="kinds">
     <button class="tab on" data-tab="batting">Batting</button>
     <button class="tab" data-tab="pitching">Pitching</button>
   </div>
@@ -130,7 +133,7 @@
   ];
   const esc = (s)=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-  let players = [], tab = 'batting', sortKey = null, sortDir = -1;
+  let allPlayers = [], players = [], teams = [], teamId = null, tab = 'batting', sortKey = null, sortDir = -1;
 
   function cols(){ return tab==='batting' ? BATTING : PITCHING; }
   function rows(){ return tab==='pitching' ? players.filter(p=>n(p.ip)>0) : players; }
@@ -161,18 +164,38 @@
 
   $('thead').addEventListener('click', (e)=>{ const th=e.target.closest('th'); if(!th) return;
     const k=th.dataset.k; if(sortKey===k) sortDir*=-1; else { sortKey=k; sortDir=-1; } render(); });
-  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  document.querySelectorAll('#kinds .tab').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('#kinds .tab').forEach(x=>x.classList.remove('on')); b.classList.add('on');
     tab=b.dataset.tab; sortKey=null; sortDir=-1; render();
   }));
 
+  function pickTeam(id){
+    teamId = id;
+    players = allPlayers.filter(p=>p.team_id===id);
+    document.querySelectorAll('#teams .tab').forEach(x=>x.classList.toggle('on', x.dataset.team===id));
+    const t = teams.find(x=>x.id===id);
+    const season = players[0]?.season || 'Fall 2026';
+    $('season').textContent = `Blue Steel Baseball${t ? ' ' + t.name : ''} · ${season}`;
+    try { const u=new URL(location); u.searchParams.set('team', t?.slug||''); history.replaceState(null,'',u); } catch {}
+    sortKey=null; sortDir=-1; render();
+  }
+  $('teams').addEventListener('click', (e)=>{ const b=e.target.closest('.tab'); if(b) pickTeam(b.dataset.team); });
+
   try {
-    const { data, error } = await sb.from('players').select('*').order('sort_order');
-    if (error) throw error;
-    players = data || [];
-    if (players[0]?.season) $('season').textContent = `Blue Steel Baseball · ${players[0].season}`;
-  } catch (e) { console.error(e); }
-  render();
+    const [pr, tr] = await Promise.all([
+      sb.from('players').select('*').order('sort_order'),
+      sb.from('teams').select('id,slug,name,sort_order').order('sort_order'),
+    ]);
+    if (pr.error) throw pr.error;
+    if (tr.error) throw tr.error;
+    allPlayers = pr.data || [];
+    teams = tr.data || [];
+    $('teams').innerHTML = teams.map(t=>`<button class="tab" data-team="${t.id}">${esc(t.name)}</button>`).join('');
+    // ?team=11u wins; otherwise the first team that has players
+    const want = new URLSearchParams(location.search).get('team');
+    const t = teams.find(x=>x.slug===want) || teams.find(x=>allPlayers.some(p=>p.team_id===x.id)) || teams[0];
+    if (t) { pickTeam(t.id); } else { players = allPlayers; render(); }
+  } catch (e) { console.error(e); render(); }
 </script>
 </body>
 </html>

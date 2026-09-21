@@ -32,9 +32,10 @@ export async function setScoreboard(creds, patch) {
 
 // Roster (for the control's Now-batting / Steel-of-the-Game pickers).
 export async function getPlayers() {
-  const { data, error } = await sb.from('players').select('*').order('sort_order');
+  const { data, error } = await sb.from('players')
+    .select('*, team:teams(name, sort_order)').order('sort_order');
   if (error) throw error;
-  return data || [];
+  return (data || []).sort((a, b) => (a.team?.sort_order ?? 0) - (b.team?.sort_order ?? 0));
 }
 
 // Reuse the existing team admin login (same username + PIN as /admin).
