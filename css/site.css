@@ -92,6 +92,20 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   font-weight: 600;
   letter-spacing: 0.02em;
 }
+.partner-strip {
+  display: flex; align-items: center; justify-content: center; gap: 0.7rem;
+  padding: 0.5rem 1rem;
+  background: var(--dugout);
+  border-bottom: 1px solid var(--chalk-line);
+  color: var(--muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+.partner-strip img { height: 1.5rem; width: auto; flex: none; }
+.partner-strip strong { color: var(--chalk); font-weight: 700; }
+.partner-strip__cta { color: var(--steel); font-family: var(--font-board); font-size: var(--text-xs); letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap; }
+.partner-strip:hover .partner-strip__cta { color: var(--steel-strong); text-decoration: underline; }
+@media (max-width: 560px) { .partner-strip__cta { display: none; } .partner-strip { font-size: var(--text-xs); } }
 .site-header {
   position: sticky; top: 0; z-index: 50;
   -webkit-backdrop-filter: blur(12px);
