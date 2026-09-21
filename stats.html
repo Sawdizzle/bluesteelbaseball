@@ -56,9 +56,20 @@
   .empty b{display:block;font-family:'Tanker','Arial Black',sans-serif;font-size:1.4rem;color:var(--chalk);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.4rem}
   .note{color:var(--faint);font-size:.8rem;font-family:'Martian Mono',monospace;letter-spacing:.06em;margin-top:1rem;text-align:center}
   a.home{color:var(--steel);text-decoration:none;font-family:'Martian Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+  .partner-strip{display:flex;align-items:center;justify-content:center;gap:.7rem;padding:.5rem 1rem;background:var(--dugout);border-bottom:1px solid var(--chalk-line);color:var(--muted);font-size:.9rem;text-align:center;text-decoration:none}
+  .partner-strip img{height:1.5rem;width:auto;flex:none}
+  .partner-strip strong{color:var(--chalk);font-weight:700}
+  .partner-strip__cta{color:var(--steel);font-family:'Martian Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+  .partner-strip:hover .partner-strip__cta{color:var(--steel-strong);text-decoration:underline}
+  @media (max-width:560px){.partner-strip__cta{display:none}.partner-strip{font-size:.74rem}}
 </style>
 </head>
 <body>
+<a class="partner-strip" href="https://www.runtheplayapp.com" target="_blank" rel="noopener">
+  <img src="/assets/runtheplay-logo.png" alt="Run The Play" width="800" height="527" />
+  <span>Our teams level up with <strong>Run The Play</strong>. Learn every situation before the ball is hit.</span>
+  <span class="partner-strip__cta" aria-hidden="true">Check it out &rarr;</span>
+</a>
 <div class="wrap">
   <header>
     <img src="/assets/logo.webp" alt="Blue Steel" />
@@ -85,9 +96,12 @@
   const avg = (h, ab) => ab > 0 ? (h/ab) : 0;
   const obp = (p) => (n(p.ab)+n(p.bb)+n(p.hbp))>0 ? (n(p.h)+n(p.bb)+n(p.hbp))/(n(p.ab)+n(p.bb)+n(p.hbp)) : 0;
   const slg = (p) => n(p.ab)>0 ? ((n(p.h)-n(p.b2)-n(p.b3)-n(p.hr)) + 2*n(p.b2) + 3*n(p.b3) + 4*n(p.hr))/n(p.ab) : 0;
-  const era = (p) => n(p.ip)>0 ? (n(p.er)*9/n(p.ip)) : 0;
+  // ERA over 7-inning games, matching GameChanger's youth setting
+  const era = (p) => n(p.ip)>0 ? (n(p.er)*7/n(p.ip)) : 0;
   const d3 = (x) => x ? x.toFixed(3).replace(/^0/, '') : '.000';   // .375
   const d2 = (x) => x.toFixed(2);
+  // ip is stored as true innings (2.3333); show baseball notation (2.1)
+  const ipFmt = (x) => { const outs = Math.round(n(x)*3); return `${Math.floor(outs/3)}.${outs%3}`; };
 
   // column defs per tab: [key, label, className, formatter, sortValue]
   const BATTING = [
@@ -109,7 +123,7 @@
   const PITCHING = [
     ['name','Pitcher','l',(p)=>`<span class="num">${p.number??''}</span><span class="pname">${esc(p.name)}</span>`, (p)=>p.sort_order],
     ['era','ERA','hl',(p)=>n(p.ip)>0?d2(era(p)):'—',(p)=>era(p)],
-    ['ip','IP','',(p)=>n(p.ip),(p)=>n(p.ip)],
+    ['ip','IP','',(p)=>ipFmt(p.ip),(p)=>n(p.ip)],
     ['k','K','',(p)=>n(p.k),(p)=>n(p.k)],
     ['bb_allowed','BB','',(p)=>n(p.bb_allowed),(p)=>n(p.bb_allowed)],
     ['er','ER','',(p)=>n(p.er),(p)=>n(p.er)],
