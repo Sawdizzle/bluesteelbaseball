@@ -281,6 +281,9 @@ h3 { font-size: var(--text-lg); letter-spacing: 0.04em; }
 .footer-row p { color: var(--faint); font-family: var(--font-board); font-size: var(--text-xs); letter-spacing: 0.2em; text-transform: uppercase; }
 .footer-row a.admin-link { color: var(--faint); font-size: var(--text-xs); letter-spacing: 0.14em; text-transform: uppercase; }
 .footer-row a.admin-link:hover { color: var(--muted); }
+.powered-by { margin-top: 1.2rem; color: var(--faint); font-size: var(--text-xs); letter-spacing: 0.14em; text-transform: uppercase; text-align: center; }
+.powered-by a { color: var(--muted); }
+.powered-by a:hover { text-decoration: underline; }
 
 /* ---------- 404 ---------- */
 .foul { min-height: 60vh; min-height: 60svh; display: grid; place-content: center; text-align: center; gap: 1.1rem; padding: 4rem 0; }
